@@ -1,9 +1,10 @@
 package com.samueloliverz.Cota.controller;
 
+import com.samueloliverz.Cota.dto.OrcamentoRequest;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
-import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.service.OrcamentoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,8 @@ public class OrcamentoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrcamentoResponse criar(@RequestBody Orcamento orcamento) {
-        return OrcamentoResponse.from(service.salvar(orcamento));
+    public OrcamentoResponse criar(@Valid @RequestBody OrcamentoRequest request) {
+        return OrcamentoResponse.from(service.salvar(request.toEntity()));
     }
 
     @GetMapping
