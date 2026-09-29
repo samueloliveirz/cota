@@ -5,7 +5,7 @@ import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

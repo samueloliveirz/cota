@@ -4,17 +4,6 @@ spring:
     username: postgres
     password: postgres
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: cota-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5051:80"
-    depends_on:
-      - postgres
-
   jpa:
     hibernate:
       ddl-auto: update

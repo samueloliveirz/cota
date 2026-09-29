@@ -1,6 +1,5 @@
 package com.samueloliverz.Cota.model;
 
-
 import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
@@ -73,7 +72,18 @@ public class Orcamento {
         itens.add(item);
     }
 
-    // calcularSubtotal() e calcularTotal() iguais aos teus
+    public BigDecimal calcularSubtotal() {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (ItemOrcamento item : itens) {
+            subtotal = subtotal.add(item.calcularTotal());
+        }
+        return subtotal;
+    }
+
+    public BigDecimal calcularTotal() {
+        BigDecimal valorFrete = frete != null ? frete : BigDecimal.ZERO;
+        return calcularSubtotal().add(valorFrete);
+    }
 
     public LocalDate getDataValidade() {
         return dataCriacao.toLocalDate().plusDays(DIAS_VALIDADE);
