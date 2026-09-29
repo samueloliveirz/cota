@@ -1,0 +1,49 @@
+package com.samueloliverz.Cota.dto;
+
+import com.samueloliverz.Cota.enums.FormaPagamento;
+import com.samueloliverz.Cota.enums.StatusOrcamento;
+import com.samueloliverz.Cota.enums.TipoRetirada;
+import com.samueloliverz.Cota.model.Orcamento;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record OrcamentoResponse(
+        Long id,
+        String empresa,
+        String cnpj,
+        TipoRetirada tipoRetirada,
+        String enderecoEnvio,
+        FormaPagamento formaPagamento,
+        Integer diasFaturamento,
+        String observacao,
+        StatusOrcamento status,
+        LocalDateTime dataCriacao,
+        LocalDate dataValidade,
+        List<ItemResponse> itens,
+        BigDecimal subtotal,
+        BigDecimal frete,
+        BigDecimal total
+) {
+    public static OrcamentoResponse from(Orcamento orcamento) {
+        return new OrcamentoResponse(
+                orcamento.getId(),
+                orcamento.getEmpresa(),
+                orcamento.getCnpj(),
+                orcamento.getTipoRetirada(),
+                orcamento.getEnderecoEnvio(),
+                orcamento.getFormaPagamento(),
+                orcamento.getDiasFaturamento(),
+                orcamento.getObservacao(),
+                orcamento.getStatus(),
+                orcamento.getDataCriacao(),
+                orcamento.getDataValidade(),
+                orcamento.getItens().stream().map(ItemResponse::from).toList(),
+                orcamento.calcularSubtotal(),
+                orcamento.getFrete(),
+                orcamento.calcularTotal()
+        );
+    }
+}

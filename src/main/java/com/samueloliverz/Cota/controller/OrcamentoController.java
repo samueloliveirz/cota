@@ -1,7 +1,8 @@
 package com.samueloliverz.Cota.controller;
 
-import com.samueloliverz.Cota.model.Orcamento;
+import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
+import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,35 +19,34 @@ public class OrcamentoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Orcamento criar(@RequestBody Orcamento orcamento) {
-        return service.salvar(orcamento);
+    public OrcamentoResponse criar(@RequestBody Orcamento orcamento) {
+        return OrcamentoResponse.from(service.salvar(orcamento));
     }
 
     @GetMapping
-    public List<Orcamento> listarTodos() {
-        return service.listarTodos();
+    public List<OrcamentoResponse> listarTodos() {
+        return service.listarTodos().stream().map(OrcamentoResponse::from).toList();
     }
 
     @GetMapping("/{id}")
-    public Orcamento buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    public OrcamentoResponse buscarPorId(@PathVariable Long id) {
+        return OrcamentoResponse.from(service.buscarPorId(id));
     }
 
     @PatchMapping("/{id}/status")
-    public Orcamento mudarStatus(@PathVariable Long id, @RequestParam StatusOrcamento status) {
-        return service.mudarStatus(id, status);
+    public OrcamentoResponse mudarStatus(@PathVariable Long id, @RequestParam StatusOrcamento status) {
+        return OrcamentoResponse.from(service.mudarStatus(id, status));
     }
 
     @GetMapping("/cnpj/{cnpj}")
-    public List<Orcamento> historicoCnpj(@PathVariable String cnpj) {
-        return service.historicoCnpj(cnpj);
+    public List<OrcamentoResponse> historicoCnpj(@PathVariable String cnpj) {
+        return service.historicoCnpj(cnpj).stream().map(OrcamentoResponse::from).toList();
     }
 
     @GetMapping("/cnpj/{cnpj}/recorrente")
     public boolean clienteRecorrente(@PathVariable String cnpj) {
         return service.clienteRecorrente(cnpj);
     }
-
 
     @DeleteMapping("/{id}/itens/{itemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
