@@ -24,6 +24,11 @@ public class OrcamentoController {
         return OrcamentoResponse.from(service.salvar(request.toEntity()));
     }
 
+    @PutMapping("/{id}")
+    public OrcamentoResponse atualizar(@PathVariable Long id, @Valid @RequestBody OrcamentoRequest request) {
+        return OrcamentoResponse.from(service.atualizar(id, request.toEntity()));
+    }
+
     @GetMapping
     public List<OrcamentoResponse> listarTodos() {
         return service.listarTodos().stream().map(OrcamentoResponse::from).toList();

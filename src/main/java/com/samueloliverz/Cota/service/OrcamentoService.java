@@ -1,13 +1,14 @@
 package com.samueloliverz.Cota.service;
 
-import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
+import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
+import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,10 +20,30 @@ public class OrcamentoService {
 
     @Transactional
     public Orcamento salvar(Orcamento orcamento) {
-        orcamento.getItens().forEach(item -> item.setOrcamento(orcamento));
         orcamento.setCnpj(limparCnpj(orcamento.getCnpj()));
         validarRegras(orcamento);
         return repository.save(orcamento);
+    }
+
+    @Transactional
+    public Orcamento atualizar(Long id, Orcamento dados) {
+        Orcamento orcamento = buscarPorId(id);
+        verificarSePodeAlterar(orcamento);
+
+        orcamento.setEmpresa(dados.getEmpresa());
+        orcamento.setCnpj(limparCnpj(dados.getCnpj()));
+        orcamento.setTipoRetirada(dados.getTipoRetirada());
+        orcamento.setEnderecoEnvio(dados.getEnderecoEnvio());
+        orcamento.setFormaPagamento(dados.getFormaPagamento());
+        orcamento.setDiasFaturamento(dados.getDiasFaturamento());
+        orcamento.setFrete(dados.getFrete());
+        orcamento.setObservacao(dados.getObservacao());
+
+        orcamento.getItens().clear();
+        dados.getItens().forEach(orcamento::adicionarItem);
+
+        validarRegras(orcamento);
+        return orcamento;
     }
 
     public List<Orcamento> listarTodos() {
@@ -31,7 +52,7 @@ public class OrcamentoService {
 
     public Orcamento buscarPorId(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Orçamento " + id + " não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orçamento " + id + " não encontrado"));
     }
 
     @Transactional
@@ -49,6 +70,25 @@ public class OrcamentoService {
         return repository.existsByCnpjAndStatus(limparCnpj(cnpj), StatusOrcamento.FECHADO);
     }
 
+    @Transactional
+    public void removerItem(Long orcamentoId, Long itemId) {
+        Orcamento orcamento = buscarPorId(orcamentoId);
+        verificarSePodeAlterar(orcamento);
+
+        boolean removeu = orcamento.getItens().removeIf(item -> item.getId().equals(itemId));
+        if (!removeu) {
+            throw new RecursoNaoEncontradoException("Item " + itemId + " não encontrado nesse orçamento");
+        }
+        if (orcamento.getItens().isEmpty()) {
+            throw new IllegalArgumentException("O orçamento precisa ter pelo menos um item");
+        }
+    }
+
+    private void verificarSePodeAlterar(Orcamento orcamento) {
+        if (orcamento.getStatus() == StatusOrcamento.FECHADO) {
+            throw new IllegalStateException("Orçamento fechado não pode ser alterado");
+        }
+    }
 
     private void validarRegras(Orcamento orcamento) {
         if (orcamento.getItens().isEmpty()) {
@@ -64,26 +104,7 @@ public class OrcamentoService {
         }
     }
 
-
-    @Transactional
-    public void removerItem(Long orcamentoId, Long itemId) {
-        Orcamento orcamento = buscarPorId(orcamentoId);
-
-        if (orcamento.getStatus() == StatusOrcamento.FECHADO) {
-            throw new IllegalStateException("Orçamento fechado não pode ser alterado");
-        }
-
-        boolean removeu = orcamento.getItens().removeIf(item -> item.getId().equals(itemId));
-        if (!removeu) {
-            throw new RuntimeException("Item " + itemId + " não pertence a esse orçamento");
-        }
-        if (orcamento.getItens().isEmpty()) {
-            throw new IllegalArgumentException("O orçamento precisa ter pelo menos um item");
-        }
-    }
-
     private String limparCnpj(String cnpj) {
         return cnpj == null ? null : cnpj.replaceAll("\\D", "");
     }
-
-}
+} 
