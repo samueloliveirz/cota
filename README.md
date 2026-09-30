@@ -144,7 +144,7 @@ Resposta (resumida):
 
 ## Próximos passos
 
-- [ ] Geração do orçamento em PDF
+- [x] Geração do orçamento em PDF
 - [ ] Autenticação com Spring Security
 - [ ] Testes unitários e de integração
 - [ ] Migrations com Flyway
