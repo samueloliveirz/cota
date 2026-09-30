@@ -13,15 +13,15 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record OrcamentoRequest(
-        @NotBlank String empresa,
-        @NotBlank String cnpj,
-        @NotNull TipoRetirada tipoRetirada,
+        @NotBlank(message = "Informe o nome da empresa") String empresa,
+        @NotBlank(message = "Informe o CNPJ") String cnpj,
+        @NotNull(message = "Informe o tipo de retirada") TipoRetirada tipoRetirada,
         String enderecoEnvio,
-        @NotNull FormaPagamento formaPagamento,
+        @NotNull(message = "Informe a forma de pagamento") FormaPagamento formaPagamento,
         Integer diasFaturamento,
-        @PositiveOrZero BigDecimal frete,
+        @PositiveOrZero(message = "O frete não pode ser negativo") BigDecimal frete,
         String observacao,
-        @NotEmpty @Valid List<ItemRequest> itens
+        @NotEmpty(message = "Adicione pelo menos um item") @Valid List<ItemRequest> itens
 ) {
     public Orcamento toEntity() {
         Orcamento orcamento = new Orcamento();

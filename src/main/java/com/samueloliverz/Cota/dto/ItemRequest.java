@@ -8,10 +8,12 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 public record ItemRequest(
-        @NotBlank String produto,
+        @NotBlank(message = "Informe o nome do produto") String produto,
         String codigo,
-        @NotNull @Positive Integer quantidade,
-        @NotNull @Positive BigDecimal precoUnitario
+        @NotNull(message = "Informe a quantidade")
+        @Positive(message = "A quantidade precisa ser maior que zero") Integer quantidade,
+        @NotNull(message = "Informe o preço unitário")
+        @Positive(message = "O preço precisa ser maior que zero") BigDecimal precoUnitario
 ) {
     public ItemOrcamento toEntity() {
         ItemOrcamento item = new ItemOrcamento();
