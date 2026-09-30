@@ -4,9 +4,13 @@ import com.samueloliverz.Cota.dto.OrcamentoRequest;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.service.OrcamentoService;
+import com.samueloliverz.Cota.service.PdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.List;
 public class OrcamentoController {
 
     private final OrcamentoService service;
+    private final PdfService pdfService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,6 +42,17 @@ public class OrcamentoController {
     @GetMapping("/{id}")
     public OrcamentoResponse buscarPorId(@PathVariable Long id) {
         return OrcamentoResponse.from(service.buscarPorId(id));
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> gerarPdf(@PathVariable Long id) {
+        OrcamentoResponse orcamento = OrcamentoResponse.from(service.buscarPorId(id));
+        byte[] pdf = pdfService.gerarOrcamento(orcamento);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=orcamento-" + id + ".pdf")
+                .body(pdf);
     }
 
     @PatchMapping("/{id}/status")
