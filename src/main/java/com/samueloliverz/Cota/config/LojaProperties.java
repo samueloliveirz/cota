@@ -7,6 +7,7 @@ public record LojaProperties(
         String nome,
         String endereco,
         String cnpj,
-        String telefone
+        String telefone,
+        String pix
 ) {
 }
