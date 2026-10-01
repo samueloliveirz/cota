@@ -83,7 +83,7 @@ A API fica disponível em `http://localhost:8080`.
 | Método | Rota | Descrição |
 |---|---|---|
 | `POST` | `/orcamentos` | Cria um orçamento |
-| `GET` | `/orcamentos` | Lista todos os orçamentos |
+| `GET` | `/orcamentos/{id}/pdf` | Gera o PDF do orçamento |
 | `GET` | `/orcamentos/{id}` | Busca um orçamento |
 | `PUT` | `/orcamentos/{id}` | Edita um orçamento |
 | `PATCH` | `/orcamentos/{id}/status?status=FECHADO` | Altera o status |
