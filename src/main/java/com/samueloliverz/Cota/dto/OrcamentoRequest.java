@@ -16,7 +16,7 @@ import java.util.List;
 public record OrcamentoRequest(
         @NotNull(message = "Informe o tipo do orçamento") TipoOrcamento tipo,
         @NotBlank(message = "Informe o nome da empresa") String empresa,
-        @NotBlank(message = "Informe o CNPJ") String cnpj,
+        String cnpj,
         @NotNull(message = "Informe o tipo de retirada") TipoRetirada tipoRetirada,
         String enderecoEnvio,
         @NotNull(message = "Informe a forma de pagamento") FormaPagamento formaPagamento,

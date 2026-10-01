@@ -3,6 +3,7 @@ package com.samueloliverz.Cota.service;
 import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
+import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
 import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
@@ -92,6 +93,10 @@ public class OrcamentoService {
     }
 
     private void validarRegras(Orcamento orcamento) {
+        if (orcamento.getTipo() != TipoOrcamento.PRESENCIAL
+                && (orcamento.getCnpj() == null || orcamento.getCnpj().isBlank())) {
+            throw new IllegalArgumentException("Informe o CNPJ");
+        }
         if (orcamento.getItens().isEmpty()) {
             throw new IllegalArgumentException("O orçamento precisa ter pelo menos um item");
         }

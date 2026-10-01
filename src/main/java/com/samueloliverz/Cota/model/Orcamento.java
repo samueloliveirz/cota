@@ -33,7 +33,7 @@ public class Orcamento {
     @Column(nullable = false)
     private String empresa;
 
-    @Column(nullable = false, length = 14)
+    @Column(length = 14)
     private String cnpj;
 
     @Enumerated(EnumType.STRING)

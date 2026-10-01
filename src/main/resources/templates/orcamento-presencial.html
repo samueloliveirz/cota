@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 15mm 15mm; }
+        body { font-family: sans-serif; font-size: 10px; color: #222; }
+        table { width: 100%; border-collapse: collapse; }
+        .via { page-break-inside: avoid; }
+        .via + .via { border-top: 1px dashed #999; margin-top: 14px; padding-top: 14px; }
+        .nome-via { text-align: right; font-size: 9px; color: #777; }
+        .cabecalho { border-bottom: 2px solid #222; padding-bottom: 6px; margin-bottom: 8px; }
+        .loja { font-size: 12px; font-weight: bold; }
+        .titulo { font-size: 15px; font-weight: bold; text-align: center; margin: 8px 0; }
+        .dados td { padding: 2px 0; }
+        .itens { margin-top: 10px; }
+        .itens th, .itens td { border: 1px solid #999; padding: 4px; }
+        .itens th { background: #eee; }
+        .direita { text-align: right; }
+        .totais { margin-top: 4px; }
+        .totais td { padding: 2px 4px; }
+        .total-geral { font-weight: bold; font-size: 12px; }
+        .obs { margin-top: 10px; font-size: 9px; }
+        .assinaturas { margin-top: 30px; }
+        .assinaturas td { width: 50%; text-align: center; padding: 0 20px; }
+        .linha { border-top: 1px solid #222; padding-top: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- Repete tudo isso 2 vezes: uma pra cada via -->
+<div class="via" th:each="via : ${ {'Via do cliente', 'Via da loja'} }">
+
+    <div class="nome-via" th:text="${via}">Via do cliente</div>
+
+    <!-- CABEÇALHO -->
+    <div class="cabecalho">
+        <table>
+            <tr>
+                <td>
+                    <div class="loja" th:text="${loja.nome}">NOME DA LOJA</div>
+                    <div th:text="${loja.endereco}">Endereço</div>
+                    <div th:text="'CNPJ: ' + ${loja.cnpj} + ' | Tel: ' + ${loja.telefone}">CNPJ</div>
+                </td>
+                <td class="direita">
+                    <div th:text="'Orçamento nº ' + ${orcamento.id}">Orçamento nº 1</div>
+                    <div th:text="'Data: ' + ${#temporals.format(orcamento.dataCriacao, 'dd/MM/yyyy')}">Data</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="titulo">Orçamento Presenciall</div>
+
+    <!-- DADOS DO CLIENTE -->
+    <table class="dados">
+        <tr>
+            <td><b>Cliente:</b> <span th:text="${orcamento.empresa}"></span></td>
+        </tr>
+
+        <tr>
+            <td><b>Retirada:</b>
+                <span th:text="${orcamento.tipoRetirada.name() == 'SEDEX' ? 'Sedex' : 'Retirada na loja'}"></span></td>
+            <td><b>Pagamento:</b>
+                <span th:text="${orcamento.formaPagamento.name() == 'FATURADO' ? 'Faturado em ' + orcamento.diasFaturamento + ' dias' : 'À vista'}"></span></td>
+        </tr>
+        <tr th:if="${orcamento.enderecoEnvio != null}">
+            <td colspan="2"><b>Endereço de envio:</b> <span th:text="${orcamento.enderecoEnvio}"></span></td>
+        </tr>
+    </table>
+
+    <!-- ITENS -->
+    <table class="itens">
+        <tr>
+            <th>Produto</th>
+            <th>Código</th>
+            <th class="direita">Qtd</th>
+            <th class="direita">Preço unit. (R$)</th>
+            <th class="direita">Total (R$)</th>
+        </tr>
+        <tr th:each="item : ${orcamento.itens}">
+            <td th:text="${item.produto}">Produto</td>
+            <td th:text="${item.codigo}">Código</td>
+            <td class="direita" th:text="${item.quantidade}">1</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+    </table>
+
+    <!-- TOTAIS -->
+    <table class="totais">
+        <tr>
+            <td class="direita">Subtotal:</td>
+            <td class="direita" style="width: 120px;"
+                th:text="${#numbers.formatDecimal(orcamento.subtotal, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr>
+            <td class="direita">Frete:</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(orcamento.frete ?: 0, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr class="total-geral">
+            <td class="direita">Total:</td>
+            <td class="direita" th:text="'R$ ' + ${#numbers.formatDecimal(orcamento.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+        </tr>
+    </table>
+
+    <!-- OBSERVAÇÕES -->
+    <div class="obs">
+        <div th:text="'Orçamento válido até ' + ${#temporals.format(orcamento.dataValidade, 'dd/MM/yyyy')} + '. Consulte disponibilidade após esse prazo.'">Validade</div>
+        <div>Valor do frete não incluso. Frete FOB.</div>
+        <div th:if="${orcamento.observacao != null}" th:text="${orcamento.observacao}">Observação</div>
+    </div>
+
+    <!-- ASSINATURAS -->
+    <table class="assinaturas">
+        <tr>
+            <td><div class="linha">Assinatura / Carimbo da empresa</div></td>
+            <td><div class="linha">Responsável pela empresa</div></td>
+        </tr>
+    </table>
+
+</div>
+<!-- fim da via -->
+
+</body>
+</html>
