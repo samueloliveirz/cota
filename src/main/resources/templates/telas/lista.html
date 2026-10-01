@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cota | Orçamentos</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f5f7; color: #222; }
+        header { background: #1f2937; color: #fff; padding: 16px 24px; }
+        header h1 { margin: 0; font-size: 22px; }
+        main { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-size: 13px; color: #555; }
+        .direita { text-align: right; }
+        .status { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .enviado { background: #dbeafe; color: #1e40af; }
+        .aguardando { background: #fef3c7; color: #92400e; }
+        .fechado { background: #dcfce7; color: #166534; }
+        .perdido { background: #fee2e2; color: #991b1b; }
+        .botao { padding: 6px 12px; background: #1f2937; color: #fff; text-decoration: none; border-radius: 6px; font-size: 13px; }
+        .vazio { text-align: center; padding: 40px; color: #777; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Cota</h1>
+</header>
+
+<main>
+    <h2>Orçamentos</h2>
+
+    <table>
+        <tr>
+            <th>Nº</th>
+            <th>Empresa</th>
+            <th>Data</th>
+            <th class="direita">Total</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+
+        <tr th:each="o : ${orcamentos}">
+            <td th:text="${o.id}">1</td>
+            <td th:text="${o.empresa}">Empresa</td>
+            <td th:text="${#temporals.format(o.dataCriacao, 'dd/MM/yyyy')}">01/01/2026</td>
+            <td class="direita"
+                th:text="'R$ ' + ${#numbers.formatDecimal(o.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+            <td>
+                <span class="status"
+                      th:classappend="${#strings.toLowerCase(o.status)}"
+                      th:text="${o.status}">ENVIADO</span>
+            </td>
+            <td>
+                <a class="botao" th:href="@{/orcamentos/{id}/pdf(id=${o.id})}" target="_blank">PDF</a>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(orcamentos)}">
+            <td colspan="6" class="vazio">Nenhum orçamento ainda.</td>
+        </tr>
+    </table>
+</main>
+
+</body>
+</html>
