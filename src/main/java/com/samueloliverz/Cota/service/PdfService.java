@@ -25,7 +25,8 @@ public class PdfService {
         context.setVariable("loja", loja);
 
         // 2. Thymeleaf preenche o HTML
-        String html = templateEngine.process("orcamento-formalizado", context);
+        String template = "orcamento-" + orcamento.tipo().name().toLowerCase();
+        String html = templateEngine.process(template, context);
 
         // 3. OpenHTMLtoPDF transforma o HTML em PDF
         try (ByteArrayOutputStream saida = new ByteArrayOutputStream()) {
