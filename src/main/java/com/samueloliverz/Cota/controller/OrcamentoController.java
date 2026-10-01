@@ -5,6 +5,7 @@ import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import com.samueloliverz.Cota.service.PdfService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -15,9 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+@Tag(name = "Orçamentos", description = "Criação, edição, status e PDF de orçamentos")
 @RestController
 @RequestMapping("/orcamentos")
 @RequiredArgsConstructor
+
 public class OrcamentoController {
 
     private final OrcamentoService service;
@@ -75,4 +79,6 @@ public class OrcamentoController {
     public void removerItem(@PathVariable Long id, @PathVariable Long itemId) {
         service.removerItem(id, itemId);
     }
+
+
 }
