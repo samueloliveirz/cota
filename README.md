@@ -147,10 +147,10 @@ Resposta (resumida):
 ## Próximos passos
 
 - [x] Geração do orçamento em PDF
-- [x] Autenticação com Spring Security
+- [ ] Autenticação com Spring Security
 - [ ] Testes unitários e de integração
 - [ ] Migrations com Flyway
-- [ ] Documentação com Swagger / OpenAPI
+- [x] Documentação com Swagger / OpenAPI
 - [ ] Front-end
 
 ## Autor
