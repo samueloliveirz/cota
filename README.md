@@ -43,6 +43,8 @@ model       → entidades JPA (Orcamento, ItemOrcamento)
 dto         → dados de entrada (Request) e saída (Response)
 exception   → tratamento global de erros (@RestControllerAdvice)
 enums       → TipoRetirada, FormaPagamento, StatusOrcamento
+Documentação interativa (Swagger): `http://localhost:8080/swagger-ui.html`
+
 ```
 
 Os valores (subtotal e total) não ficam salvos no banco: são calculados a partir dos itens e do frete, assim nunca ficam desatualizados.
