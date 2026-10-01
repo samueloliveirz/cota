@@ -2,6 +2,7 @@ package com.samueloliverz.Cota.dto;
 
 import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
+import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.model.Orcamento;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 public record OrcamentoResponse(
         Long id,
+        TipoOrcamento tipo,
         String empresa,
         String cnpj,
         TipoRetirada tipoRetirada,
@@ -30,6 +32,7 @@ public record OrcamentoResponse(
     public static OrcamentoResponse from(Orcamento orcamento) {
         return new OrcamentoResponse(
                 orcamento.getId(),
+                orcamento.getTipo(),
                 orcamento.getEmpresa(),
                 orcamento.getCnpj(),
                 orcamento.getTipoRetirada(),

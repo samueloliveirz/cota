@@ -2,6 +2,7 @@ package com.samueloliverz.Cota.model;
 
 import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
+import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class Orcamento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private TipoOrcamento tipo;
 
     @Column(nullable = false)
     private String empresa;

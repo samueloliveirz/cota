@@ -1,6 +1,7 @@
 package com.samueloliverz.Cota.dto;
 
 import com.samueloliverz.Cota.enums.FormaPagamento;
+import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.model.Orcamento;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record OrcamentoRequest(
+        @NotNull(message = "Informe o tipo do orçamento") TipoOrcamento tipo,
         @NotBlank(message = "Informe o nome da empresa") String empresa,
         @NotBlank(message = "Informe o CNPJ") String cnpj,
         @NotNull(message = "Informe o tipo de retirada") TipoRetirada tipoRetirada,
@@ -25,6 +27,7 @@ public record OrcamentoRequest(
 ) {
     public Orcamento toEntity() {
         Orcamento orcamento = new Orcamento();
+        orcamento.setTipo(tipo);
         orcamento.setEmpresa(empresa);
         orcamento.setCnpj(cnpj);
         orcamento.setTipoRetirada(tipoRetirada);

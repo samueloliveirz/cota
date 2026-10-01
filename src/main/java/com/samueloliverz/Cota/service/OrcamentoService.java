@@ -30,6 +30,7 @@ public class OrcamentoService {
         Orcamento orcamento = buscarPorId(id);
         verificarSePodeAlterar(orcamento);
 
+        orcamento.setTipo(dados.getTipo());
         orcamento.setEmpresa(dados.getEmpresa());
         orcamento.setCnpj(limparCnpj(dados.getCnpj()));
         orcamento.setTipoRetirada(dados.getTipoRetirada());
