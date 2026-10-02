@@ -3,10 +3,14 @@ package com.samueloliverz.Cota.controller;
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
+import com.samueloliverz.Cota.service.PdfService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.List;
 public class OrdemManutencaoController {
 
     private final OrdemManutencaoService service;
+    private final PdfService pdfService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -38,5 +43,16 @@ public class OrdemManutencaoController {
     @GetMapping("/{id}")
     public OrdemManutencaoResponse buscarPorId(@PathVariable Long id) {
         return OrdemManutencaoResponse.from(service.buscarPorId(id));
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> gerarPdf(@PathVariable Long id) {
+        OrdemManutencaoResponse ordem = OrdemManutencaoResponse.from(service.buscarPorId(id));
+        byte[] pdf = pdfService.gerarManutencao(ordem);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=manutencao-" + id + ".pdf")
+                .body(pdf);
     }
 }

@@ -3,6 +3,7 @@ package com.samueloliverz.Cota.service;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.samueloliverz.Cota.config.LojaProperties;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
+import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -24,11 +25,30 @@ public class PdfService {
         context.setVariable("orcamento", orcamento);
         context.setVariable("loja", loja);
 
-        // 2. Thymeleaf preenche o HTML
+        // 2. Escolhe o template pelo tipo (ex: orcamento-normal, orcamento-vale)
         String template = "orcamento-" + orcamento.tipo().name().toLowerCase();
+
+        // 3. Gera o PDF
+        return renderizar(template, context);
+    }
+
+    public byte[] gerarManutencao(OrdemManutencaoResponse ordem) {
+        // 1. Coloca os dados que o template vai usar
+        Context context = new Context();
+        context.setVariable("ordem", ordem);
+        context.setVariable("loja", loja);
+
+        // 2. A manutenção só tem um template, então o nome é fixo
+        // 3. Gera o PDF
+        return renderizar("ordem-manutencao", context);
+    }
+
+    // Parte comum dos dois PDFs: HTML -> PDF
+    private byte[] renderizar(String template, Context context) {
+        // Thymeleaf preenche o HTML com os dados
         String html = templateEngine.process(template, context);
 
-        // 3. OpenHTMLtoPDF transforma o HTML em PDF
+        // OpenHTMLtoPDF transforma o HTML em PDF
         try (ByteArrayOutputStream saida = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();

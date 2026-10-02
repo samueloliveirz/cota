@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    @page { size: A4; margin: 15mm 15mm; }
+    body { font-family: sans-serif; font-size: 10px; color: #222; }
+    table { width: 100%; border-collapse: collapse; }
+    .via { page-break-inside: avoid; }
+    .via + .via { border-top: 1px dashed #999; margin-top: 14px; padding-top: 14px; }
+    .nome-via { text-align: right; font-size: 9px; color: #777; }
+    .cabecalho { border-bottom: 2px solid #222; padding-bottom: 6px; margin-bottom: 8px; }
+    .loja { font-size: 12px; font-weight: bold; }
+    .direita { text-align: right; }
+    .titulo { font-size: 15px; font-weight: bold; text-align: center; margin: 8px 0; }
+    .dados td { padding: 3px 0; }
+    .caixa { border: 1px solid #222; padding: 6px; margin-top: 8px; min-height: 60px; }
+    .rotulo { font-weight: bold; margin-bottom: 4px; }
+    .assinaturas { margin-top: 40px; }
+    .assinaturas td { width: 50%; text-align: center; padding: 0 20px; }
+    .linha { border-top: 1px solid #222; padding-top: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- Repete tudo isso 2 vezes: uma pra cada via -->
+<div class="via" th:each="via : ${ {'Via do cliente', 'Via da loja'} }">
+
+  <div class="nome-via" th:text="${via}">Via do cliente</div>
+
+  <!-- CABEÇALHO -->
+  <div class="cabecalho">
+    <table>
+      <tr>
+        <td>
+          <div class="loja" th:text="${loja.nome}">NOME DA LOJA</div>
+          <div th:text="${loja.endereco}">Endereço</div>
+          <div th:text="'CNPJ: ' + ${loja.cnpj} + ' | Tel: ' + ${loja.telefone}">CNPJ</div>
+        </td>
+        <td class="direita">
+          <div th:text="'OS nº ' + ${ordem.id}">OS nº 1</div>
+          <div th:text="'Data: ' + ${#temporals.format(ordem.dataCriacao, 'dd/MM/yyyy')}">Data</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="titulo">Ordem de Manutenção</div>
+
+  <!-- DADOS -->
+  <table class="dados">
+    <tr>
+      <td><b>Cliente:</b> <span th:text="${ordem.cliente}"></span></td>
+      <td><b>Telefone:</b> <span th:text="${ordem.telefone}"></span></td>
+    </tr>
+    <tr>
+      <td><b>Produto:</b>
+        <span th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(ordem.produto.name()), '_', ' '))}"></span></td>
+      <td><b>Código:</b> <span th:text="${ordem.codigoProduto}"></span></td>
+    </tr>
+  </table>
+
+  <!-- PROBLEMA RELATADO -->
+  <div class="caixa">
+    <div class="rotulo">Problema relatado</div>
+    <div th:text="${ordem.problemaRelatado}">Problema</div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="caixa" th:if="${ordem.observacao != null}">
+    <div class="rotulo">Observações</div>
+    <div th:text="${ordem.observacao}">Observação</div>
+  </div>
+
+  <!-- ASSINATURAS -->
+  <table class="assinaturas">
+    <tr>
+      <td><div class="linha">Assinatura do cliente</div></td>
+      <td><div class="linha">Responsável técnico</div></td>
+    </tr>
+  </table>
+
+</div>
+<!-- fim da via -->
+
+</body>
+</html>
