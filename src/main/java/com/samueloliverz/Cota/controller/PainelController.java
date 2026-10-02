@@ -44,6 +44,11 @@ public class PainelController {
         return "telas/lista";
     }
 
+    @GetMapping("/orcamentos/novo")
+    public String novoOrcamento() {
+        return "telas/orcamento-form";
+    }
+
     @GetMapping("/manutencoes/nova")
     public String novaManutencao(Model model) {
         model.addAttribute("produtos", ProdutoManutencao.values());
