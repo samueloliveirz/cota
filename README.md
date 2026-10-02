@@ -93,6 +93,12 @@ A API fica disponível em `http://localhost:8080`.
 | `GET` | `/orcamentos/cnpj/{cnpj}` | Histórico de orçamentos do CNPJ |
 | `GET` | `/orcamentos/cnpj/{cnpj}/recorrente` | Informa se o cliente já comprou antes |
 
+| `POST` | `/manutencoes` | Cria uma ordem de manutenção |
+| `GET` | `/manutencoes` | Lista as ordens de manutenção |
+| `GET` | `/manutencoes/{id}` | Busca uma ordem de manutenção |
+| `PUT` | `/manutencoes/{id}` | Edita uma ordem de manutenção |
+| `GET` | `/manutencoes/{id}/pdf` | Gera o PDF da ordem (2 vias) |
+
 ### Exemplo: criar orçamento
 
 `POST /orcamentos`
