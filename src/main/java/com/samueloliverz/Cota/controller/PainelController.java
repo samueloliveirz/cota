@@ -28,8 +28,12 @@ public class PainelController {
     private final OrcamentoService service;
     private final OrdemManutencaoService manutencaoService;
 
-    // ===== LISTA DE ORÇAMENTOS =====
     @GetMapping
+    public String menu() {
+        return "telas/menu";
+    }
+
+    @GetMapping("/orcamentos")
     public String listar(Model model) {
         List<OrcamentoResponse> orcamentos = service.listarTodos().stream()
                 .map(OrcamentoResponse::from)
@@ -40,22 +44,17 @@ public class PainelController {
         return "telas/lista";
     }
 
-    // ===== MANUTENÇÃO =====
-
-    // 1. Abre o formulário vazio
     @GetMapping("/manutencoes/nova")
     public String novaManutencao(Model model) {
         model.addAttribute("produtos", ProdutoManutencao.values());
         return "telas/manutencao-form";
     }
 
-    // 2. Recebe o formulário preenchido
     @PostMapping("/manutencoes")
     public String salvarManutencao(@Valid @ModelAttribute("form") OrdemManutencaoRequest form,
                                    BindingResult resultado,
                                    Model model) {
 
-        // Se tiver erro de validação, volta pro formulário mostrando as mensagens
         if (resultado.hasErrors()) {
             List<String> erros = resultado.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -65,7 +64,6 @@ public class PainelController {
             return "telas/manutencao-form";
         }
 
-        // Tudo certo: salva e abre o PDF
         OrdemManutencao salva = manutencaoService.salvar(form.toEntity());
         return "redirect:/manutencoes/" + salva.getId() + "/pdf";
     }
