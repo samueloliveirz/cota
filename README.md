@@ -18,6 +18,9 @@ O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de 
   - orçamento fechado não pode ser alterado
 - Validação dos dados de entrada com mensagens claras
 - Tratamento global de erros com respostas padronizadas (400 e 404)
+- Ordem de manutenção com PDF em duas vias
+- PDF por tipo de orçamento (formalizado, normal, presencial e vale)
+- Telas web: menu, novo orçamento, nova manutenção e lista
 
 ## Tecnologias
 
@@ -92,7 +95,6 @@ A API fica disponível em `http://localhost:8080`.
 | `DELETE` | `/orcamentos/{id}/itens/{itemId}` | Remove um item |
 | `GET` | `/orcamentos/cnpj/{cnpj}` | Histórico de orçamentos do CNPJ |
 | `GET` | `/orcamentos/cnpj/{cnpj}/recorrente` | Informa se o cliente já comprou antes |
-
 | `POST` | `/manutencoes` | Cria uma ordem de manutenção |
 | `GET` | `/manutencoes` | Lista as ordens de manutenção |
 | `GET` | `/manutencoes/{id}` | Busca uma ordem de manutenção |
