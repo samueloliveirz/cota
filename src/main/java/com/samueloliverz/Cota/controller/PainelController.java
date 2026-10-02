@@ -3,6 +3,7 @@ package com.samueloliverz.Cota.controller;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
+import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.OrdemManutencao;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -41,7 +39,14 @@ public class PainelController {
                 .toList();
 
         model.addAttribute("orcamentos", orcamentos);
+        model.addAttribute("statusList", StatusOrcamento.values());
         return "telas/lista";
+    }
+
+    @PostMapping("/orcamentos/{id}/status")
+    public String mudarStatus(@PathVariable Long id, @RequestParam StatusOrcamento status) {
+        service.mudarStatus(id, status);
+        return "redirect:/painel/orcamentos";
     }
 
     @GetMapping("/orcamentos/novo")

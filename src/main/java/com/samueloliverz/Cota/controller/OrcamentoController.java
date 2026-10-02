@@ -8,6 +8,11 @@ import com.samueloliverz.Cota.service.PdfService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,12 +21,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @Tag(name = "Orçamentos", description = "Criação, edição, status e PDF de orçamentos")
 @RestController
 @RequestMapping("/orcamentos")
 @RequiredArgsConstructor
-
 public class OrcamentoController {
 
     private final OrcamentoService service;
@@ -39,8 +42,11 @@ public class OrcamentoController {
     }
 
     @GetMapping
-    public List<OrcamentoResponse> listarTodos() {
-        return service.listarTodos().stream().map(OrcamentoResponse::from).toList();
+    public Page<OrcamentoResponse> buscar(
+            @RequestParam(required = false) String empresa,
+            @RequestParam(required = false) StatusOrcamento status,
+            @ParameterObject @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return service.buscar(empresa, status, pageable).map(OrcamentoResponse::from);
     }
 
     @GetMapping("/{id}")
@@ -79,6 +85,4 @@ public class OrcamentoController {
     public void removerItem(@PathVariable Long id, @PathVariable Long itemId) {
         service.removerItem(id, itemId);
     }
-
-
 }

@@ -8,6 +8,8 @@ import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
 import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,6 +110,15 @@ public class OrcamentoService {
                 && (orcamento.getDiasFaturamento() == null || orcamento.getDiasFaturamento() <= 0)) {
             throw new IllegalArgumentException("Faturado precisa dos dias de faturamento");
         }
+    }
+
+    public Page<Orcamento> buscar(String empresa, StatusOrcamento status, Pageable pageable) {
+        String termo = empresa == null ? "" : empresa.trim();
+
+        if (status == null) {
+            return repository.findByEmpresaContainingIgnoreCase(termo, pageable);
+        }
+        return repository.findByEmpresaContainingIgnoreCaseAndStatus(termo, status, pageable);
     }
 
     private String limparCnpj(String cnpj) {
