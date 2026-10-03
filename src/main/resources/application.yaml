@@ -12,6 +12,15 @@ spring:
       hibernate:
         format_sql: true
 
+springdoc:
+  swagger-ui:
+    csrf:
+      enabled: true
+
+cota:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    senha: ${ADMIN_SENHA:admin123}
 
 loja:
   nome: LOJA EXEMPLO HIDRÁULICA LTDA
