@@ -21,6 +21,9 @@ O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de 
 - Ordem de manutenção com PDF em duas vias
 - PDF por tipo de orçamento (formalizado, normal, presencial e vale)
 - Telas web: menu, novo orçamento, nova manutenção e lista
+- - Login com usuários no banco (senha com BCrypt) e perfis USER e ADMIN
+- Cada vendedor vê só os orçamentos do seu setor (hidráulica ou pneumática); o ADMIN vê todos
+- Cadastro de usuários restrito ao ADMIN
 
 ## Tecnologias
 
