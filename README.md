@@ -160,7 +160,7 @@ Resposta (resumida):
 - [x] Geração do orçamento em PDF
 - [x] Autenticação com Spring Security
 - [ ] Testes unitários e de integração
-- [ ] Migrations com Flyway
+- [x] Migrations com Flyway
 - [x] Documentação com Swagger / OpenAPI
 - [ ] Front-end
 
