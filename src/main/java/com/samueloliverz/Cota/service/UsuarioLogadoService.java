@@ -1,5 +1,6 @@
 package com.samueloliverz.Cota.service;
 
+import com.samueloliverz.Cota.enums.Role;
 import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,5 +17,9 @@ public class UsuarioLogadoService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return repository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Usuário logado não encontrado"));
+    }
+
+    public boolean isAdmin() {
+        return get().getRole() == Role.ADMIN;
     }
 }

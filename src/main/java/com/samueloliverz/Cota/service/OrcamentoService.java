@@ -1,11 +1,13 @@
 package com.samueloliverz.Cota.service;
 
 import com.samueloliverz.Cota.enums.FormaPagamento;
+import com.samueloliverz.Cota.enums.Setor;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
-import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.enums.TipoOrcamento;
+import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
 import com.samueloliverz.Cota.model.Orcamento;
+import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -53,11 +55,32 @@ public class OrcamentoService {
     }
 
     public List<Orcamento> listarTodos() {
-        return repository.findAll();
+        if (usuarioLogado.isAdmin()) {
+            return repository.findAll();
+        }
+        return repository.findBySetor(setorDoUsuario());
+    }
+
+    public Page<Orcamento> buscar(String empresa, StatusOrcamento status, Pageable pageable) {
+        String termo = empresa == null ? "" : empresa.trim();
+
+        if (usuarioLogado.isAdmin()) {
+            if (status == null) {
+                return repository.findByEmpresaContainingIgnoreCase(termo, pageable);
+            }
+            return repository.findByEmpresaContainingIgnoreCaseAndStatus(termo, status, pageable);
+        }
+
+        Setor setor = setorDoUsuario();
+        if (status == null) {
+            return repository.findByEmpresaContainingIgnoreCaseAndSetor(termo, setor, pageable);
+        }
+        return repository.findByEmpresaContainingIgnoreCaseAndStatusAndSetor(termo, status, setor, pageable);
     }
 
     public Orcamento buscarPorId(Long id) {
         return repository.findById(id)
+                .filter(this::podeVer)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Orçamento " + id + " não encontrado"));
     }
 
@@ -69,7 +92,10 @@ public class OrcamentoService {
     }
 
     public List<Orcamento> historicoCnpj(String cnpj) {
-        return repository.findByCnpjOrderByDataCriacaoDesc(limparCnpj(cnpj));
+        if (usuarioLogado.isAdmin()) {
+            return repository.findByCnpjOrderByDataCriacaoDesc(limparCnpj(cnpj));
+        }
+        return repository.findByCnpjAndSetorOrderByDataCriacaoDesc(limparCnpj(cnpj), setorDoUsuario());
     }
 
     public boolean clienteRecorrente(String cnpj) {
@@ -88,6 +114,16 @@ public class OrcamentoService {
         if (orcamento.getItens().isEmpty()) {
             throw new IllegalArgumentException("O orçamento precisa ter pelo menos um item");
         }
+    }
+
+    private boolean podeVer(Orcamento orcamento) {
+        Usuario usuario = usuarioLogado.get();
+        return usuario.getRole() == com.samueloliverz.Cota.enums.Role.ADMIN
+                || orcamento.getSetor() == usuario.getSetor();
+    }
+
+    private Setor setorDoUsuario() {
+        return usuarioLogado.get().getSetor();
     }
 
     private void verificarSePodeAlterar(Orcamento orcamento) {
@@ -114,16 +150,7 @@ public class OrcamentoService {
         }
     }
 
-    public Page<Orcamento> buscar(String empresa, StatusOrcamento status, Pageable pageable) {
-        String termo = empresa == null ? "" : empresa.trim();
-
-        if (status == null) {
-            return repository.findByEmpresaContainingIgnoreCase(termo, pageable);
-        }
-        return repository.findByEmpresaContainingIgnoreCaseAndStatus(termo, status, pageable);
-    }
-
     private String limparCnpj(String cnpj) {
         return cnpj == null ? null : cnpj.replaceAll("\\D", "");
     }
-} 
+}
