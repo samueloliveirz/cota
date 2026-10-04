@@ -223,14 +223,27 @@
     window.scrollTo(0, 0);
   }
 
+  function lerCookie(nome) {
+    const item = document.cookie.split('; ').find(c => c.startsWith(nome + '='));
+    return item ? decodeURIComponent(item.split('=')[1]) : null;
+  }
+
   async function enviar(evento) {
     evento.preventDefault();
 
     const resposta = await fetch('/orcamentos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': lerCookie('XSRF-TOKEN')
+      },
       body: JSON.stringify(montarOrcamento())
     });
+
+    if (resposta.status === 403) {
+      mostrarErros({ mensagem: 'Sessão expirada. Faça login de novo.' });
+      return;
+    }
 
     const corpo = await resposta.json();
 

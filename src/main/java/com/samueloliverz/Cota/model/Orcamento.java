@@ -4,6 +4,7 @@ import com.samueloliverz.Cota.enums.FormaPagamento;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
+import com.samueloliverz.Cota.enums.Setor;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,6 +57,10 @@ public class Orcamento {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusOrcamento status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Setor setor;
 
     @Column(nullable = false)
     private LocalDateTime dataCriacao;

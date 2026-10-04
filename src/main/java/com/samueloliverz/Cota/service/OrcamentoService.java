@@ -20,10 +20,12 @@ import java.util.List;
 public class OrcamentoService {
 
     private final OrcamentoRepository repository;
+    private final UsuarioLogadoService usuarioLogado;
 
     @Transactional
     public Orcamento salvar(Orcamento orcamento) {
         orcamento.setCnpj(limparCnpj(orcamento.getCnpj()));
+        orcamento.setSetor(usuarioLogado.get().getSetor());
         validarRegras(orcamento);
         return repository.save(orcamento);
     }

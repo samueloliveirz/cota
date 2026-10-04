@@ -56,6 +56,7 @@
     <table class="dados">
         <tr>
             <td><b>Cliente:</b> <span th:text="${orcamento.empresa}"></span></td>
+            <td th:if="${orcamento.cnpj != null}"><b>CNPJ:</b> <span th:text="${orcamento.cnpj}"></span></td>
         </tr>
 
         <tr>
