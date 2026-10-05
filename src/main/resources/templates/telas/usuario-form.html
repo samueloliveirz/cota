@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cota | Novo usuário</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/cota.css}">
+  <style>
+    .migalha { font-size: 13px; color: #5B6474; }
+    .migalha a { color: #5B6474; text-decoration: none; }
+    .migalha a:hover { color: #0E1726; }
+
+    .formulario { max-width: 760px; display: flex; flex-direction: column; gap: 20px; }
+    .card h2 { margin: 0; font-size: 16px; font-weight: 600; }
+    .card .explica { margin: 4px 0 16px; font-size: 13px; color: #5B6474; }
+    .bloco + .bloco { margin-top: 16px; }
+    .dica { font-size: 12px; color: #5B6474; }
+    .mono { font-family: 'Geist Mono', monospace; }
+
+    .senha { position: relative; }
+    .senha .in { padding-right: 48px; }
+    .olho { position: absolute; top: 2px; right: 2px; width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; color: #5B6474; cursor: pointer; }
+    .olho:hover { background: #F2F4F7; color: #0E1726; }
+    .regra.ok { color: #067647; }
+
+    .opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .opcao input { position: absolute; opacity: 0; pointer-events: none; }
+    .opcao span { display: flex; flex-direction: column; gap: 4px; height: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid #E4E7EC; background: #FFFFFF; cursor: pointer; }
+    .opcao span:hover { border-color: #98A2B3; }
+    .opcao strong { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .opcao small { font-size: 13px; color: #5B6474; line-height: 1.4; }
+    .opcao input:checked + span { border-color: #0E1726; box-shadow: 0 0 0 1px #0E1726; background: #F5F7FB; }
+    .opcao input:focus-visible + span { outline: 2px solid #2B5BD7; outline-offset: 2px; }
+
+    .alerta-ok { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .alerta-ok a { color: #067647; font-weight: 600; }
+    .acoes-form { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside th:replace="~{fragments/sidebar :: sidebar('novo-usuario')}"></aside>
+
+  <main class="conteudo">
+    <div>
+      <div class="migalha">
+        <a th:href="@{/painel/usuarios}">Usuários</a> / Novo
+      </div>
+      <h1 style="margin-top: 8px;">Novo usuário</h1>
+      <p class="subtitulo">Crie um acesso ao Cota. O setor define quais orçamentos a pessoa vai ver.</p>
+    </div>
+
+    <div class="alerta-ok formulario" th:if="${criado != null}">
+      <span th:text="'Usuário ' + ${criado} + ' criado.'">Usuário criado.</span>
+      <a th:href="@{/painel/usuarios}">Ver usuários</a>
+    </div>
+
+    <div class="alerta-erro formulario" th:if="${erros != null}">
+      <strong>Não foi possível criar o usuário:</strong>
+      <div th:each="erro : ${erros}" th:text="${erro}">Erro</div>
+    </div>
+
+    <form class="formulario" method="post" th:action="@{/painel/usuarios}">
+
+      <section class="card">
+        <h2>Acesso</h2>
+        <p class="explica">Dados que a pessoa usa na tela de login.</p>
+
+        <div class="campo bloco">
+          <label class="lbl" for="username">Usuário</label>
+          <input class="in mono" id="username" name="username" autocomplete="off" spellcheck="false"
+                 placeholder="nome.sobrenome" th:value="${form?.username()}">
+          <span class="dica">Não pode repetir um usuário que já existe.</span>
+        </div>
+
+        <div class="campo bloco">
+          <label class="lbl" for="senha">Senha</label>
+          <div class="senha">
+            <input class="in" id="senha" name="senha" type="password"
+                   autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+            <button type="button" class="olho" id="mostrarSenha" title="Mostrar senha">👁</button>
+          </div>
+          <span class="dica regra" id="regraSenha">Mínimo de 6 caracteres (0/6)</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Setor</h2>
+        <p class="explica">Os orçamentos e manutenções criados por essa pessoa ficam neste setor.</p>
+        <div class="opcoes">
+          <label class="opcao">
+            <input type="radio" name="setor" value="HIDRAULICA"
+                   th:checked="${form?.setor()?.name() != 'PNEUMATICA'}">
+            <span>
+                            <strong><span class="dot hidraulica"></span>Hidráulica</strong>
+                            <small>Cilindros, bombas, válvulas e unidades hidráulicas.</small>
+                        </span>
+          </label>
+          <label class="opcao">
+            <input type="radio" name="setor" value="PNEUMATICA"
+                   th:checked="${form?.setor()?.name() == 'PNEUMATICA'}">
+            <span>
+                            <strong><span class="dot pneumatica"></span>Pneumática</strong>
+                            <small>Cilindros pneumáticos, válvulas e conexões.</small>
+                        </span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Perfil</h2>
+        <p class="explica">O que essa pessoa pode fazer no sistema.</p>
+        <div class="opcoes">
+          <label class="opcao">
+            <input type="radio" name="role" value="USER"
+                   th:checked="${form?.role()?.name() != 'ADMIN'}">
+            <span>
+                            <strong>Usuário</strong>
+                            <small>Cria e acompanha orçamentos e manutenções do próprio setor.</small>
+                        </span>
+          </label>
+          <label class="opcao">
+            <input type="radio" name="role" value="ADMIN"
+                   th:checked="${form?.role()?.name() == 'ADMIN'}">
+            <span>
+                            <strong>Administrador</strong>
+                            <small>Vê tudo de todos os setores e cadastra usuários.</small>
+                        </span>
+          </label>
+        </div>
+      </section>
+
+      <div class="acoes-form">
+        <a class="btn btn-secundario" th:href="@{/painel/usuarios}">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Criar usuário</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+  const senha = document.getElementById('senha');
+  const regra = document.getElementById('regraSenha');
+  const olho = document.getElementById('mostrarSenha');
+
+  senha.addEventListener('input', () => {
+    const ok = senha.value.length >= 6;
+    regra.classList.toggle('ok', ok);
+    regra.textContent = ok ? 'Senha com 6 caracteres ou mais ✓' : `Mínimo de 6 caracteres (${senha.value.length}/6)`;
+  });
+
+  olho.addEventListener('click', () => {
+    const mostrando = senha.type === 'text';
+    senha.type = mostrando ? 'password' : 'text';
+    olho.title = mostrando ? 'Mostrar senha' : 'Ocultar senha';
+  });
+</script>
+
+</body>
+</html>

@@ -3,11 +3,13 @@ package com.samueloliverz.Cota.controller;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
+import com.samueloliverz.Cota.dto.UsuarioRequest;
 import com.samueloliverz.Cota.dto.UsuarioResponse;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.model.OrdemManutencao;
+import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
 import com.samueloliverz.Cota.service.UsuarioService;
@@ -22,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Comparator;
 import java.util.List;
@@ -106,10 +109,7 @@ public class PainelController {
                                    Model model) {
 
         if (resultado.hasErrors()) {
-            List<String> erros = resultado.getFieldErrors().stream()
-                    .map(FieldError::getDefaultMessage)
-                    .toList();
-            model.addAttribute("erros", erros);
+            model.addAttribute("erros", mensagens(resultado));
             model.addAttribute("produtos", ProdutoManutencao.values());
             return "telas/manutencao-form";
         }
@@ -127,5 +127,37 @@ public class PainelController {
 
         model.addAttribute("usuarios", usuarios);
         return "telas/usuarios";
+    }
+
+    @GetMapping("/usuarios/novo")
+    public String novoUsuario() {
+        return "telas/usuario-form";
+    }
+
+    @PostMapping("/usuarios")
+    public String salvarUsuario(@Valid @ModelAttribute("form") UsuarioRequest form,
+                                BindingResult resultado,
+                                Model model,
+                                RedirectAttributes redirect) {
+
+        if (resultado.hasErrors()) {
+            model.addAttribute("erros", mensagens(resultado));
+            return "telas/usuario-form";
+        }
+
+        try {
+            Usuario criado = usuarioService.criar(form);
+            redirect.addFlashAttribute("criado", criado.getUsername());
+            return "redirect:/painel/usuarios/novo";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erros", List.of(e.getMessage()));
+            return "telas/usuario-form";
+        }
+    }
+
+    private List<String> mensagens(BindingResult resultado) {
+        return resultado.getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .toList();
     }
 }
