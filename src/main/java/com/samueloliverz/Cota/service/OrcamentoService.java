@@ -9,6 +9,8 @@ import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
 import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.repository.OrcamentoRepository;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -152,5 +154,21 @@ public class OrcamentoService {
 
     private String limparCnpj(String cnpj) {
         return cnpj == null ? null : cnpj.replaceAll("\\D", "");
+    }
+
+    public Map<String, Long> contarPorStatus() {
+        boolean admin = usuarioLogado.isAdmin();
+        Setor setor = setorDoUsuario();
+
+        Map<String, Long> contagem = new LinkedHashMap<>();
+        contagem.put("TODOS", admin ? repository.count() : repository.countBySetor(setor));
+
+        for (StatusOrcamento status : StatusOrcamento.values()) {
+            long total = admin
+                    ? repository.countByStatus(status)
+                    : repository.countBySetorAndStatus(setor, status);
+            contagem.put(status.name(), total);
+        }
+        return contagem;
     }
 }

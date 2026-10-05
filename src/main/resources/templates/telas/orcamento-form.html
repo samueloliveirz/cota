@@ -3,147 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cota | Novo orçamento</title>
+  <title th:text="${orcamentoId == null} ? 'Cota | Novo orçamento' : 'Cota | Editar orçamento'">Cota | Novo orçamento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/cota.css}">
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #f4f5f7; color: #222; }
-    header { background: #1f2937; color: #fff; padding: 16px 24px; }
-    header h1 { margin: 0; font-size: 22px; }
-    main { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
-    .card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
-    .card h3 { margin-top: 0; }
-    .linha { display: flex; gap: 16px; }
-    .campo { flex: 1; margin-bottom: 14px; }
-    label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    textarea { height: 60px; resize: vertical; }
-    .escondido { display: none; }
-    .itens { width: 100%; border-collapse: collapse; }
-    .itens th { text-align: left; font-size: 13px; padding: 6px; }
+    .escondido { display: none !important; }
+    .trilha { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #5B6474; }
+    .trilha a { color: #5B6474; text-decoration: none; }
+    .trilha strong { color: #0E1726; font-weight: 500; }
+
+    .editor { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+    .coluna { flex: 1 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+    .card h2 { margin: 0 0 16px; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+    .card-sub { margin: -12px 0 16px; font-size: 13px; color: #5B6474; }
+    .grade { display: flex; flex-wrap: wrap; gap: 16px; }
+    .grade > * { flex: 1 1 240px; }
+    .dica { font-weight: 400; color: #5B6474; }
+
+    .tipos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .tipos button { text-align: left; padding: 12px 14px; border-radius: 10px; border: 1px solid #E4E7EC; background: #FFFFFF; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; gap: 2px; }
+    .tipos button strong { font-size: 14px; font-weight: 600; color: #0E1726; }
+    .tipos button span { font-size: 12px; color: #5B6474; }
+    .tipos button.ativo { border-color: #0E1726; box-shadow: 0 0 0 1px #0E1726; background: #F5F7FB; }
+
+    .segmentado { display: flex; padding: 3px; gap: 3px; background: #F2F4F7; border-radius: 10px; }
+    .segmentado button { flex: 1; min-height: 38px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 500; color: #5B6474; cursor: pointer; }
+    .segmentado button.ativo { background: #FFFFFF; color: #0E1726; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12); }
+
+    .recorrencia { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #F9FAFB; border: 1px solid #EEF0F3; }
+    .rec-topo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #4A5260; }
+    .selo { padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .selo.recorrente { background: #ECFDF3; color: #067647; }
+    .selo.novo { background: #EEF4FF; color: #2E4BB0; }
+    .btn-pequeno { min-height: 32px; padding: 0 12px; font-size: 13px; margin-left: auto; }
+    .hist-linha { display: grid; grid-template-columns: 70px 100px 1fr 100px; gap: 12px; padding: 8px 0; border-top: 1px solid #EEF0F3; font-size: 13px; }
+    .hist-linha:first-child { margin-top: 10px; }
+    .mono { font-family: 'Geist Mono', monospace; }
+
+    .itens-scroll { overflow-x: auto; }
+    .itens { width: 100%; min-width: 640px; border-collapse: collapse; }
+    .itens th { text-align: left; font-size: 12px; font-weight: 500; color: #5B6474; padding: 0 6px 8px; }
     .itens td { padding: 4px 6px; }
+    .itens .in { height: 38px; }
     .direita { text-align: right; }
-    .totais { text-align: right; margin-top: 12px; font-size: 15px; }
-    .totais div { margin: 4px 0; }
-    .total-geral { font-weight: bold; font-size: 18px; }
-    .erros { background: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; }
-    .botoes { display: flex; gap: 10px; }
-    .botao { padding: 10px 18px; background: #1f2937; color: #fff; border: none; border-radius: 6px;
-      font-size: 14px; cursor: pointer; text-decoration: none; }
-    .botao.secundario { background: #6b7280; }
-    .remover { background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+    .total-item { font-size: 14px; font-weight: 500; white-space: nowrap; }
+    .remover { width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; color: #5B6474; cursor: pointer; }
+    .remover:hover { background: #FEF3F2; color: #B42318; }
+
+    .resumo { flex: 0 1 300px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .resumo-total { display: flex; flex-direction: column; gap: 4px; padding-bottom: 16px; border-bottom: 1px solid #EEF0F3; }
+    .resumo-total span { font-size: 13px; color: #5B6474; }
+    .resumo-total strong { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+    .resumo-linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+    .resumo-linha span:first-child { color: #5B6474; }
+    .resumo .btn { justify-content: center; }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Cota</h1>
-</header>
+<div class="app">
+  <aside th:replace="~{fragments/sidebar :: sidebar('novo-orcamento')}"></aside>
 
-<main>
-  <h2>Novo orçamento</h2>
-
-  <div id="erros" class="erros escondido"></div>
-
-  <form id="formulario">
-
-    <div class="card">
-      <h3>Cliente</h3>
-      <div class="linha">
-        <div class="campo">
-          <label for="tipo">Tipo</label>
-          <select id="tipo">
-            <option value="FORMALIZADO">Formalizado</option>
-            <option value="NORMAL">Normal</option>
-            <option value="PRESENCIAL">Presencial</option>
-            <option value="VALE">Vale (contas a receber)</option>
-          </select>
-        </div>
-        <div class="campo">
-          <label for="empresa">Empresa / cliente</label>
-          <input id="empresa" required>
-        </div>
-        <div class="campo">
-          <label for="cnpj">CNPJ</label>
-          <input id="cnpj" placeholder="Opcional no presencial">
-        </div>
-      </div>
+  <main class="conteudo" id="pagina" th:attr="data-id=${orcamentoId}">
+    <div class="trilha">
+      <a th:href="@{/painel/orcamentos}">Orçamentos</a>
+      <span>›</span>
+      <strong id="trilhaAtual" th:text="${orcamentoId == null} ? 'Novo orçamento' : 'Editar #' + ${orcamentoId}">Novo orçamento</strong>
     </div>
 
-    <div class="card">
-      <h3>Entrega e pagamento</h3>
-      <div class="linha">
-        <div class="campo">
-          <label for="tipoRetirada">Retirada</label>
-          <select id="tipoRetirada">
-            <option value="LOJA">Retirada na loja</option>
-            <option value="SEDEX">Sedex</option>
-          </select>
-        </div>
-        <div class="campo">
-          <label for="formaPagamento">Pagamento</label>
-          <select id="formaPagamento">
-            <option value="A_VISTA">À vista</option>
-            <option value="FATURADO">Faturado</option>
-          </select>
-        </div>
-        <div class="campo escondido" id="campoDias">
-          <label for="diasFaturamento">Dias de faturamento</label>
-          <input id="diasFaturamento" type="number" min="1">
-        </div>
-        <div class="campo">
-          <label for="frete">Frete (R$)</label>
-          <input id="frete" type="number" min="0" step="0.01" value="0">
-        </div>
-      </div>
-      <div class="campo escondido" id="campoEndereco">
-        <label for="enderecoEnvio">Endereço de envio</label>
-        <input id="enderecoEnvio">
-      </div>
+    <div>
+      <h1 id="titulo" th:text="${orcamentoId == null} ? 'Novo orçamento' : 'Editar orçamento #' + ${orcamentoId}">Novo orçamento</h1>
+      <p class="subtitulo" th:text="${orcamentoId == null} ? 'Salvo no seu setor, com status Enviado e validade de 20 dias.' : 'Os itens salvos substituem os anteriores.'">Salvo no seu setor.</p>
     </div>
 
-    <div class="card">
-      <h3>Itens</h3>
-      <table class="itens">
-        <thead>
-        <tr>
-          <th style="width: 40%">Produto</th>
-          <th>Código</th>
-          <th style="width: 90px">Qtd</th>
-          <th style="width: 130px">Preço unit.</th>
-          <th class="direita" style="width: 110px">Total</th>
-          <th style="width: 50px"></th>
-        </tr>
-        </thead>
-        <tbody id="itens"></tbody>
-      </table>
+    <div id="erros" class="alerta-erro escondido"></div>
+    <div id="sucesso" class="alerta-ok escondido"></div>
 
-      <button type="button" class="botao secundario" id="adicionar" style="margin-top: 10px;">+ Adicionar item</button>
+    <div class="editor">
+      <div class="coluna">
 
-      <div class="totais">
-        <div>Subtotal: R$ <span id="subtotal">0,00</span></div>
-        <div>Frete: R$ <span id="valorFrete">0,00</span></div>
-        <div class="total-geral">Total: R$ <span id="total">0,00</span></div>
+        <section class="card">
+          <h2>Tipo de orçamento</h2>
+          <p class="card-sub">Define o modelo do PDF.</p>
+          <div class="tipos" data-grupo="tipo">
+            <button type="button" data-valor="FORMALIZADO"><strong>Formalizado</strong><span>Proposta comercial</span></button>
+            <button type="button" data-valor="NORMAL"><strong>Normal</strong><span>Orçamento simples</span></button>
+            <button type="button" data-valor="PRESENCIAL"><strong>Presencial</strong><span>Balcão, CNPJ opcional</span></button>
+            <button type="button" data-valor="VALE"><strong>Vale</strong><span>Contas a receber</span></button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Cliente</h2>
+          <div class="grade">
+            <label class="campo">
+              <span class="lbl">Empresa</span>
+              <input class="in" id="empresa" placeholder="Razão social ou nome">
+            </label>
+            <label class="campo">
+              <span class="lbl">CNPJ <span class="dica" id="dicaCnpj"></span></span>
+              <input class="in mono" id="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00">
+            </label>
+          </div>
+
+          <div id="recorrencia" class="recorrencia escondido">
+            <div class="rec-topo">
+              <span id="recSelo" class="selo"></span>
+              <span id="recTexto"></span>
+              <button type="button" id="btnHistorico" class="btn btn-secundario btn-pequeno">Ver histórico</button>
+            </div>
+            <div id="historico" class="escondido"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Itens</h2>
+          <div class="itens-scroll">
+            <table class="itens">
+              <thead>
+              <tr>
+                <th style="width: 38%">Produto</th>
+                <th>Código</th>
+                <th style="width: 80px">Qtd</th>
+                <th style="width: 130px">Preço unit. (R$)</th>
+                <th class="direita" style="width: 110px">Total</th>
+                <th style="width: 44px"></th>
+              </tr>
+              </thead>
+              <tbody id="itens"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-secundario" id="adicionar" style="margin-top: 12px">+ Adicionar item</button>
+        </section>
+
+        <section class="card">
+          <h2>Entrega e pagamento</h2>
+          <div class="grade">
+            <div class="campo">
+              <span class="lbl">Retirada</span>
+              <div class="segmentado" data-grupo="tipoRetirada">
+                <button type="button" data-valor="LOJA">Retirada na loja</button>
+                <button type="button" data-valor="SEDEX">Sedex</button>
+              </div>
+              <label class="campo escondido" id="campoEndereco" style="margin-top: 10px">
+                <span class="lbl">Endereço de envio</span>
+                <input class="in" id="enderecoEnvio" placeholder="Rua, número, bairro, cidade/UF, CEP">
+              </label>
+            </div>
+            <div class="campo">
+              <span class="lbl">Pagamento</span>
+              <div class="segmentado" data-grupo="formaPagamento">
+                <button type="button" data-valor="A_VISTA">À vista</button>
+                <button type="button" data-valor="FATURADO">Faturado</button>
+              </div>
+              <label class="campo escondido" id="campoDias" style="margin-top: 10px">
+                <span class="lbl">Dias de faturamento</span>
+                <input class="in" id="diasFaturamento" type="number" min="1" placeholder="Ex.: 28">
+              </label>
+            </div>
+          </div>
+          <div class="grade" style="margin-top: 16px">
+            <label class="campo" style="flex: 0 1 180px">
+              <span class="lbl">Frete (R$)</span>
+              <input class="in" id="frete" type="number" min="0" step="0.01" value="0">
+            </label>
+            <label class="campo">
+              <span class="lbl">Observação</span>
+              <textarea class="in" id="observacao" rows="2" placeholder="Aparece no PDF"></textarea>
+            </label>
+          </div>
+        </section>
       </div>
+
+      <aside class="card resumo">
+        <div class="resumo-total">
+          <span>Total</span>
+          <strong id="total">R$ 0,00</strong>
+        </div>
+        <div class="resumo-linha"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+        <div class="resumo-linha"><span>Frete</span><span id="valorFrete">R$ 0,00</span></div>
+        <div class="resumo-linha"><span>Tipo</span><span id="resumoTipo">Formalizado</span></div>
+        <div class="resumo-linha"><span>Pagamento</span><span id="resumoPagamento">À vista</span></div>
+        <div class="resumo-linha"><span>Válido até</span><span id="resumoValidade">—</span></div>
+        <button type="button" class="btn btn-primario" id="salvar">Salvar orçamento</button>
+        <a class="btn btn-secundario" th:href="@{/painel/orcamentos}">Cancelar</a>
+      </aside>
     </div>
-
-    <div class="card">
-      <div class="campo">
-        <label for="observacao">Observação</label>
-        <textarea id="observacao"></textarea>
-      </div>
-      <div class="botoes">
-        <button type="submit" class="botao">Gerar PDF</button>
-        <a class="botao secundario" th:href="@{/painel}">Voltar</a>
-      </div>
-    </div>
-  </form>
-</main>
+  </main>
+</div>
 
 <script>
+  let orcamentoId = document.getElementById('pagina').dataset.id || null;
   const tabela = document.getElementById('itens');
+  const escolhas = { tipo: 'FORMALIZADO', tipoRetirada: 'LOJA', formaPagamento: 'A_VISTA' };
+  const ROTULOS = { FORMALIZADO: 'Formalizado', NORMAL: 'Normal', PRESENCIAL: 'Presencial', VALE: 'Vale' };
 
-  function formatar(valor) {
-    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function reais(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function dataBr(iso) {
+    return iso.slice(0, 10).split('-').reverse().join('/');
   }
 
   function texto(id) {
@@ -156,17 +216,41 @@
     return valor === '' ? null : Number(valor);
   }
 
-  function adicionarItem() {
+  function lerCookie(nome) {
+    const item = document.cookie.split('; ').find(c => c.startsWith(nome + '='));
+    return item ? decodeURIComponent(item.split('=')[1]) : null;
+  }
+
+  function escolher(grupo, valor) {
+    escolhas[grupo] = valor;
+    document.querySelectorAll(`[data-grupo="${grupo}"] button`)
+            .forEach(botao => botao.classList.toggle('ativo', botao.dataset.valor === valor));
+    atualizarCamposExtras();
+    recalcular();
+  }
+
+  function atualizarCamposExtras() {
+    document.getElementById('campoEndereco').classList.toggle('escondido', escolhas.tipoRetirada !== 'SEDEX');
+    document.getElementById('campoDias').classList.toggle('escondido', escolhas.formaPagamento !== 'FATURADO');
+    document.getElementById('dicaCnpj').textContent = escolhas.tipo === 'PRESENCIAL' ? '(opcional no presencial)' : '';
+  }
+
+  function adicionarItem(item = {}) {
     const linha = document.createElement('tr');
     linha.innerHTML = `
-            <td><input class="produto" required></td>
-            <td><input class="codigo"></td>
-            <td><input class="quantidade" type="number" min="1" value="1" required></td>
-            <td><input class="preco" type="number" min="0.01" step="0.01" required></td>
-            <td class="direita total-item">0,00</td>
-            <td><button type="button" class="remover">✕</button></td>
+            <td><input class="in produto" placeholder="Nome do produto"></td>
+            <td><input class="in codigo mono" placeholder="Opcional"></td>
+            <td><input class="in quantidade" type="number" min="1" value="1"></td>
+            <td><input class="in preco" type="number" min="0.01" step="0.01"></td>
+            <td class="direita total-item">R$ 0,00</td>
+            <td><button type="button" class="remover" aria-label="Remover item">✕</button></td>
         `;
+    linha.querySelector('.produto').value = item.produto ?? '';
+    linha.querySelector('.codigo').value = item.codigo ?? '';
+    linha.querySelector('.quantidade').value = item.quantidade ?? 1;
+    linha.querySelector('.preco').value = item.precoUnitario ?? '';
     tabela.appendChild(linha);
+    recalcular();
   }
 
   function recalcular() {
@@ -175,22 +259,60 @@
     tabela.querySelectorAll('tr').forEach(linha => {
       const quantidade = Number(linha.querySelector('.quantidade').value) || 0;
       const preco = Number(linha.querySelector('.preco').value) || 0;
-      const totalItem = quantidade * preco;
-      linha.querySelector('.total-item').textContent = formatar(totalItem);
-      subtotal += totalItem;
+      linha.querySelector('.total-item').textContent = reais(quantidade * preco);
+      subtotal += quantidade * preco;
     });
 
     const frete = numero('frete') || 0;
-    document.getElementById('subtotal').textContent = formatar(subtotal);
-    document.getElementById('valorFrete').textContent = formatar(frete);
-    document.getElementById('total').textContent = formatar(subtotal + frete);
+    const dias = numero('diasFaturamento');
+
+    document.getElementById('subtotal').textContent = reais(subtotal);
+    document.getElementById('valorFrete').textContent = reais(frete);
+    document.getElementById('total').textContent = reais(subtotal + frete);
+    document.getElementById('resumoTipo').textContent = ROTULOS[escolhas.tipo];
+    document.getElementById('resumoPagamento').textContent = escolhas.formaPagamento === 'FATURADO'
+            ? (dias ? `Faturado ${dias} dias` : 'Faturado')
+            : 'À vista';
   }
 
-  function atualizarCamposExtras() {
-    const sedex = document.getElementById('tipoRetirada').value === 'SEDEX';
-    const faturado = document.getElementById('formaPagamento').value === 'FATURADO';
-    document.getElementById('campoEndereco').classList.toggle('escondido', !sedex);
-    document.getElementById('campoDias').classList.toggle('escondido', !faturado);
+  async function consultarCliente() {
+    const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+    const caixa = document.getElementById('recorrencia');
+
+    if (cnpj.length !== 14) {
+      caixa.classList.add('escondido');
+      return;
+    }
+
+    const [recorrente, historico] = await Promise.all([
+      fetch(`/orcamentos/cnpj/${cnpj}/recorrente`).then(r => r.json()),
+      fetch(`/orcamentos/cnpj/${cnpj}`).then(r => r.json())
+    ]);
+
+    const anteriores = historico.filter(o => String(o.id) !== String(orcamentoId));
+    const selo = document.getElementById('recSelo');
+    selo.textContent = recorrente ? 'Cliente recorrente' : 'Primeira compra';
+    selo.className = 'selo ' + (recorrente ? 'recorrente' : 'novo');
+    document.getElementById('recTexto').textContent = recorrente
+            ? 'Já tem orçamento fechado com este CNPJ.'
+            : 'Nenhum orçamento fechado com este CNPJ.';
+
+    const lista = document.getElementById('historico');
+    lista.innerHTML = '';
+    anteriores.forEach(o => {
+      const linha = document.createElement('div');
+      linha.className = 'hist-linha';
+      linha.innerHTML = '<span class="mono"></span><span></span><span></span><span></span>';
+      const [num, data, total, status] = linha.children;
+      num.textContent = '#' + o.id;
+      data.textContent = dataBr(o.dataCriacao);
+      total.textContent = reais(o.total);
+      status.textContent = o.status.charAt(0) + o.status.slice(1).toLowerCase();
+      lista.appendChild(linha);
+    });
+
+    document.getElementById('btnHistorico').classList.toggle('escondido', anteriores.length === 0);
+    caixa.classList.remove('escondido');
   }
 
   function montarOrcamento() {
@@ -202,13 +324,13 @@
     }));
 
     return {
-      tipo: texto('tipo'),
+      tipo: escolhas.tipo,
       empresa: texto('empresa'),
       cnpj: texto('cnpj'),
-      tipoRetirada: texto('tipoRetirada'),
-      enderecoEnvio: texto('enderecoEnvio'),
-      formaPagamento: texto('formaPagamento'),
-      diasFaturamento: numero('diasFaturamento'),
+      tipoRetirada: escolhas.tipoRetirada,
+      enderecoEnvio: escolhas.tipoRetirada === 'SEDEX' ? texto('enderecoEnvio') : null,
+      formaPagamento: escolhas.formaPagamento,
+      diasFaturamento: escolhas.formaPagamento === 'FATURADO' ? numero('diasFaturamento') : null,
       frete: numero('frete'),
       observacao: texto('observacao'),
       itens: itens
@@ -218,21 +340,30 @@
   function mostrarErros(resposta) {
     const mensagens = resposta.campos ? Object.values(resposta.campos) : [resposta.mensagem];
     const caixa = document.getElementById('erros');
-    caixa.innerHTML = [...new Set(mensagens)].map(m => `<div>${m}</div>`).join('');
+    caixa.textContent = '';
+    [...new Set(mensagens)].forEach(m => {
+      const linha = document.createElement('div');
+      linha.textContent = m;
+      caixa.appendChild(linha);
+    });
     caixa.classList.remove('escondido');
+    document.getElementById('sucesso').classList.add('escondido');
     window.scrollTo(0, 0);
   }
 
-  function lerCookie(nome) {
-    const item = document.cookie.split('; ').find(c => c.startsWith(nome + '='));
-    return item ? decodeURIComponent(item.split('=')[1]) : null;
+  function mostrarSucesso(id) {
+    const caixa = document.getElementById('sucesso');
+    caixa.innerHTML = `Orçamento <strong>#${id}</strong> salvo. <a href="/orcamentos/${id}/pdf" target="_blank">Abrir PDF</a> · <a href="/painel/orcamentos">Ver na lista</a>`;
+    caixa.classList.remove('escondido');
+    document.getElementById('erros').classList.add('escondido');
+    document.getElementById('titulo').textContent = 'Editar orçamento #' + id;
+    document.getElementById('trilhaAtual').textContent = 'Editar #' + id;
+    window.scrollTo(0, 0);
   }
 
-  async function enviar(evento) {
-    evento.preventDefault();
-
-    const resposta = await fetch('/orcamentos', {
-      method: 'POST',
+  async function salvar() {
+    const resposta = await fetch(orcamentoId ? `/orcamentos/${orcamentoId}` : '/orcamentos', {
+      method: orcamentoId ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-XSRF-TOKEN': lerCookie('XSRF-TOKEN')
@@ -248,11 +379,38 @@
     const corpo = await resposta.json();
 
     if (resposta.ok) {
-      window.location.href = `/orcamentos/${corpo.id}/pdf`;
+      orcamentoId = corpo.id;
+      mostrarSucesso(corpo.id);
     } else {
       mostrarErros(corpo);
     }
   }
+
+  async function carregar() {
+    const resposta = await fetch(`/orcamentos/${orcamentoId}`);
+    if (!resposta.ok) {
+      mostrarErros({ mensagem: 'Orçamento não encontrado.' });
+      return;
+    }
+
+    const o = await resposta.json();
+    escolher('tipo', o.tipo);
+    escolher('tipoRetirada', o.tipoRetirada);
+    escolher('formaPagamento', o.formaPagamento);
+    document.getElementById('empresa').value = o.empresa ?? '';
+    document.getElementById('cnpj').value = o.cnpj ?? '';
+    document.getElementById('enderecoEnvio').value = o.enderecoEnvio ?? '';
+    document.getElementById('diasFaturamento').value = o.diasFaturamento ?? '';
+    document.getElementById('frete').value = o.frete ?? 0;
+    document.getElementById('observacao').value = o.observacao ?? '';
+    document.getElementById('resumoValidade').textContent = dataBr(o.dataValidade);
+    o.itens.forEach(item => adicionarItem(item));
+    recalcular();
+    consultarCliente();
+  }
+
+  document.querySelectorAll('[data-grupo] button').forEach(botao =>
+          botao.addEventListener('click', () => escolher(botao.closest('[data-grupo]').dataset.grupo, botao.dataset.valor)));
 
   tabela.addEventListener('input', recalcular);
   tabela.addEventListener('click', evento => {
@@ -261,13 +419,26 @@
       recalcular();
     }
   });
-  document.getElementById('adicionar').addEventListener('click', adicionarItem);
+  document.getElementById('adicionar').addEventListener('click', () => adicionarItem());
   document.getElementById('frete').addEventListener('input', recalcular);
-  document.getElementById('tipoRetirada').addEventListener('change', atualizarCamposExtras);
-  document.getElementById('formaPagamento').addEventListener('change', atualizarCamposExtras);
-  document.getElementById('formulario').addEventListener('submit', enviar);
+  document.getElementById('diasFaturamento').addEventListener('input', recalcular);
+  document.getElementById('cnpj').addEventListener('change', consultarCliente);
+  document.getElementById('btnHistorico').addEventListener('click', () =>
+          document.getElementById('historico').classList.toggle('escondido'));
+  document.getElementById('salvar').addEventListener('click', salvar);
 
-  adicionarItem();
+  escolher('tipo', 'FORMALIZADO');
+  escolher('tipoRetirada', 'LOJA');
+  escolher('formaPagamento', 'A_VISTA');
+
+  if (orcamentoId) {
+    carregar();
+  } else {
+    const validade = new Date();
+    validade.setDate(validade.getDate() + 20);
+    document.getElementById('resumoValidade').textContent = validade.toLocaleDateString('pt-BR');
+    adicionarItem();
+  }
 </script>
 
 </body>

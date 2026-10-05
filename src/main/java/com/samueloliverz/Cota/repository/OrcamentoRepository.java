@@ -26,4 +26,10 @@ public interface OrcamentoRepository extends JpaRepository<Orcamento, Long> {
         Page<Orcamento> findByEmpresaContainingIgnoreCaseAndSetor(String empresa, Setor setor, Pageable pageable);
 
         Page<Orcamento> findByEmpresaContainingIgnoreCaseAndStatusAndSetor(String empresa, StatusOrcamento status, Setor setor, Pageable pageable);
+
+        long countBySetor(Setor setor);
+
+        long countByStatus(StatusOrcamento status);
+
+        long countBySetorAndStatus(Setor setor, StatusOrcamento status);
 }
