@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<aside class="sidebar" th:fragment="sidebar(ativo)"
+       th:with="admin=${usuarioLogado.role.name() == 'ADMIN'}">
+
+  <div class="marca">
+    <div class="marca-logo">C</div>
+    <div>
+      <span class="marca-nome">Cota</span>
+      <span class="marca-sub">Comercial Cadiriri</span>
+    </div>
+  </div>
+
+  <div class="setor-box">
+    <span class="rotulo">Setor</span>
+    <span class="setor-nome">
+            <span class="dot" th:classappend="${admin ? 'todos' : #strings.toLowerCase(usuarioLogado.setor.name())}"></span>
+            <span th:text="${admin ? 'Todos os setores' : (usuarioLogado.setor.name() == 'PNEUMATICA' ? 'Pneumática' : 'Hidráulica')}">Hidráulica</span>
+        </span>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-grupo">
+      <span class="rotulo">Orçamentos</span>
+      <a th:href="@{/painel/orcamentos}" th:classappend="${ativo == 'orcamentos'} ? 'ativo'">Lista de orçamentos</a>
+      <a th:href="@{/painel/orcamentos/novo}" th:classappend="${ativo == 'novo-orcamento'} ? 'ativo'">Novo orçamento</a>
+    </div>
+
+    <div class="nav-grupo">
+      <span class="rotulo">Manutenção</span>
+      <a th:href="@{/painel/manutencoes}" th:classappend="${ativo == 'manutencoes'} ? 'ativo'">Ordens de manutenção</a>
+      <a th:href="@{/painel/manutencoes/nova}" th:classappend="${ativo == 'nova-manutencao'} ? 'ativo'">Nova manutenção</a>
+    </div>
+
+    <div class="nav-grupo" th:if="${admin}">
+      <span class="rotulo">Administração</span>
+      <a th:href="@{/painel/usuarios}" th:classappend="${ativo == 'usuarios'} ? 'ativo'">Usuários</a>
+      <a th:href="@{/painel/usuarios/novo}" th:classappend="${ativo == 'novo-usuario'} ? 'ativo'">Novo usuário</a>
+    </div>
+  </nav>
+
+  <div class="usuario-box">
+    <div class="avatar" th:text="${#strings.toUpperCase(#strings.substring(usuarioLogado.username, 0, 2))}">AD</div>
+    <div class="usuario-info">
+      <span class="usuario-nome" th:text="${usuarioLogado.username}">admin</span>
+      <span class="usuario-role" th:text="${admin ? 'Administrador' : 'Usuário'}">Administrador</span>
+    </div>
+    <form method="post" th:action="@{/logout}">
+      <button type="submit" class="sair" aria-label="Sair">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"></path></svg>
+      </button>
+    </form>
+  </div>
+</aside>
+
+</body>
+</html>

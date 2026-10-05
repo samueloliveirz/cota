@@ -1,0 +1,62 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #F6F7F9; color: #0E1726; font-family: 'Geist', sans-serif; }
+a { color: #0E1726; }
+
+.app { min-height: 100vh; display: flex; }
+
+.sidebar { width: 248px; flex: none; background: #0E1726; color: #C8D0DC; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; }
+.marca { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+.marca-logo { width: 34px; height: 34px; border-radius: 9px; background: #FFFFFF; color: #0E1726; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; letter-spacing: -0.04em; }
+.marca-nome { display: block; font-size: 16px; font-weight: 600; color: #FFFFFF; }
+.marca-sub { display: block; font-size: 12px; color: #8A96A8; }
+
+.rotulo { font-size: 11px; font-weight: 500; color: #8A96A8; letter-spacing: 0.08em; text-transform: uppercase; }
+.setor-box { margin: 0 4px; padding: 10px 12px; border-radius: 9px; background: #162033; display: flex; flex-direction: column; gap: 3px; }
+.setor-nome { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #FFFFFF; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.dot.hidraulica { background: #E39A3B; }
+.dot.pneumatica { background: #5AA9E6; }
+.dot.todos { background: #AEB8C7; }
+
+.nav { display: flex; flex-direction: column; gap: 20px; }
+.nav-grupo { display: flex; flex-direction: column; gap: 2px; }
+.nav-grupo .rotulo { padding: 0 12px 6px; }
+.nav a { display: flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500; color: #C8D0DC; }
+.nav a:hover { background: #162033; color: #FFFFFF; }
+.nav a.ativo { background: #1B2740; color: #FFFFFF; }
+
+.usuario-box { margin-top: auto; display: flex; align-items: center; gap: 12px; padding: 14px 8px 0; border-top: 1px solid #1E2A3F; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: #2B3A55; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex: none; }
+.usuario-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.usuario-nome { font-size: 14px; font-weight: 500; color: #FFFFFF; overflow: hidden; text-overflow: ellipsis; }
+.usuario-role { font-size: 12px; color: #8A96A8; }
+.sair { width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; color: #C8D0DC; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sair:hover { background: #162033; color: #FFFFFF; }
+
+.conteudo { flex: 1; min-width: 0; padding: 32px clamp(16px, 4vw, 48px) 56px; display: flex; flex-direction: column; gap: 24px; }
+.topo { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; }
+h1 { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+.subtitulo { margin: 6px 0 0; font-size: 14px; color: #5B6474; }
+
+.card { background: #FFFFFF; border: 1px solid #E4E7EC; border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); padding: 20px 24px; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; font-family: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
+.btn-primario { background: #0E1726; color: #FFFFFF; }
+.btn-primario:hover { background: #22314C; color: #FFFFFF; }
+.btn-secundario { background: #FFFFFF; color: #0E1726; border: 1px solid #D0D5DD; }
+.btn-secundario:hover { background: #F9FAFB; }
+
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.lbl { font-size: 13px; font-weight: 500; color: #344054; }
+.in { height: 44px; width: 100%; padding: 0 12px; border-radius: 8px; background: #FFFFFF; border: 1px solid #D0D5DD; color: #0E1726; font-family: inherit; font-size: 14px; }
+textarea.in { height: auto; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+.in:focus { outline: none; border-color: #0E1726; box-shadow: 0 0 0 3px rgba(14, 23, 38, 0.10); }
+.in::placeholder { color: #8A93A3; }
+
+.alerta-erro { padding: 14px 16px; border-radius: 10px; background: #FEF3F2; border: 1px solid #FECDCA; color: #B42318; font-size: 14px; }
+.alerta-ok { padding: 14px 16px; border-radius: 10px; background: #ECFDF3; border: 1px solid #ABEFC6; color: #067647; font-size: 14px; }
+
+@media (max-width: 800px) {
+    .app { flex-direction: column; }
+    .sidebar { width: auto; }
+}

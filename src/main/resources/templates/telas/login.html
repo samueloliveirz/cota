@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cota | Entrar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cota.css}">
+    <style>
+        body { background: #FFFFFF; }
+        .login { min-height: 100vh; display: flex; flex-wrap: wrap; }
+        .login-lado { flex: 1 1 520px; background-color: #0E1726;
+            background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 48px 48px; color: #FFFFFF; padding: 40px clamp(20px, 5vw, 64px);
+            display: flex; flex-direction: column; justify-content: space-between; gap: 48px; }
+        .login-lado h2 { margin: 0; font-size: clamp(34px, 3.6vw, 48px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.08; max-width: 520px; }
+        .login-lado p { margin: 16px 0 0; font-size: 16px; line-height: 1.55; color: #AEB8C7; max-width: 520px; }
+        .login-form { flex: 1 1 420px; display: flex; align-items: center; justify-content: center; padding: 48px 20px; }
+        .login-form form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 20px; }
+        .login-form h1 { font-size: 28px; }
+        .login-form .btn { justify-content: center; min-height: 48px; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="login">
+    <div class="login-lado">
+        <div class="marca" style="padding: 0">
+            <div class="marca-logo">C</div>
+            <span class="marca-nome">Cota</span>
+        </div>
+        <div>
+            <h2>Propostas comerciais com padrão de empresa grande.</h2>
+            <p>Monte, calcule e envie orçamentos de hidráulica e pneumática em um só lugar.</p>
+        </div>
+        <span style="font-size: 13px; color: #8A96A8">Comercial Cadiriri</span>
+    </div>
+
+    <div class="login-form">
+        <form method="post" th:action="@{/login}">
+            <div>
+                <h1>Entrar</h1>
+                <p class="subtitulo">Use o acesso fornecido pelo administrador.</p>
+            </div>
+
+            <div class="alerta-erro" th:if="${param.error}">Usuário ou senha inválidos.</div>
+            <div class="alerta-ok" th:if="${param.logout}">Você saiu do sistema.</div>
+
+            <label class="campo">
+                <span class="lbl">Usuário</span>
+                <input class="in" name="username" autocomplete="username" required autofocus>
+            </label>
+            <label class="campo">
+                <span class="lbl">Senha</span>
+                <input class="in" name="password" type="password" autocomplete="current-password" required>
+            </label>
+
+            <button type="submit" class="btn btn-primario">Entrar</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

@@ -4,46 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cota</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, sans-serif; background: #f4f5f7; color: #222; }
-        header { background: #1f2937; color: #fff; padding: 16px 24px; }
-        header h1 { margin: 0; font-size: 22px; }
-        main { max-width: 800px; margin: 24px auto; padding: 0 16px; }
-        .grade { display: flex; flex-wrap: wrap; gap: 16px; }
-        .opcao { display: block; flex: 1 1 220px; background: #fff; border-radius: 8px; padding: 24px;
-            text-decoration: none; color: #222; border: 2px solid transparent; }
-        .opcao:hover { border-color: #1f2937; }
-        .opcao h3 { margin: 0 0 6px; }
-        .opcao p { margin: 0; color: #666; font-size: 14px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cota.css}">
 </head>
 <body>
 
-<header>
-    <h1>Cota</h1>
-</header>
+<div class="app">
+    <aside th:replace="~{fragments/sidebar :: sidebar('inicio')}"></aside>
 
-<main>
-    <h2>O que você quer fazer?</h2>
-
-    <div class="grade">
-        <a class="opcao" th:href="@{/painel/orcamentos/novo}">
-            <h3>Novo orçamento</h3>
-            <p>Formalizado, normal, presencial ou vale</p>
-        </a>
-
-        <a class="opcao" th:href="@{/painel/manutencoes/nova}">
-            <h3>Nova manutenção</h3>
-            <p>Ordem de manutenção com 2 vias</p>
-        </a>
-
-        <a class="opcao" th:href="@{/painel/orcamentos}">
-            <h3>Orçamentos</h3>
-            <p>Lista, status e PDF</p>
-        </a>
-    </div>
-</main>
+    <main class="conteudo">
+        <div>
+            <h1 th:text="'Olá, ' + ${usuarioLogado.username}">Olá</h1>
+            <p class="subtitulo">Escolha uma opção no menu ao lado.</p>
+        </div>
+    </main>
+</div>
 
 </body>
 </html>

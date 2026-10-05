@@ -21,10 +21,13 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**").permitAll()
                         .requestMatchers("/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
-                        .defaultSuccessUrl("/painel"))
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/painel")
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout"))
                 .csrf(csrf -> csrf
