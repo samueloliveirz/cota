@@ -25,11 +25,11 @@ public class PdfService {
         context.setVariable("orcamento", orcamento);
         context.setVariable("loja", loja);
 
-        // 2. Escolhe o template pelo tipo (ex: orcamento-normal, orcamento-vale)
+        // 2. Escolhe o template pelo tipo (ex: pdf/orcamento-normal, pdf/orcamento-vale)
         String template = "pdf/orcamento-" + orcamento.tipo().name().toLowerCase();
 
         // 3. Gera o PDF
-        return renderizar("pdf/ordem-manutencao", context);
+        return renderizar(template, context);
     }
 
     public byte[] gerarManutencao(OrdemManutencaoResponse ordem) {
@@ -40,9 +40,8 @@ public class PdfService {
 
         // 2. A manutenção só tem um template, então o nome é fixo
         // 3. Gera o PDF
-        return renderizar("ordem-manutencao", context);
+        return renderizar("pdf/ordem-manutencao", context);
     }
-
     // Parte comum dos dois PDFs: HTML -> PDF
     private byte[] renderizar(String template, Context context) {
         // Thymeleaf preenche o HTML com os dados
