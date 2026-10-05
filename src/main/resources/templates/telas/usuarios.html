@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cota | Usuários</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cota.css}">
+    <style>
+        .tabela { min-width: 640px; }
+        .usuario { display: flex; align-items: center; gap: 12px; }
+        .iniciais { width: 32px; height: 32px; flex: none; border-radius: 50%; background: #F2F4F7; color: #344054; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .tag.admin { background: #0E1726; color: #FFFFFF; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <aside th:replace="~{fragments/sidebar :: sidebar('usuarios')}"></aside>
+
+    <main class="conteudo">
+        <div class="topo">
+            <div>
+                <h1>Usuários</h1>
+                <p class="subtitulo">Quem acessa o Cota e de qual setor. Só administradores veem esta tela.</p>
+            </div>
+            <a class="btn btn-primario" th:href="@{/painel/usuarios/novo}">+ Novo usuário</a>
+        </div>
+
+        <div class="card tabela-card">
+            <div class="tabela-scroll">
+                <table class="tabela">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Setor</th>
+                        <th>Perfil</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${usuarios}">
+                        <td class="mono" th:text="${u.id}">1</td>
+                        <td>
+                            <span class="usuario">
+                                <span class="iniciais" th:text="${#strings.toUpperCase(#strings.substring(u.username, 0, #strings.length(u.username) > 1 ? 2 : 1))}">AD</span>
+                                <span class="mono" th:text="${u.username}">admin</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="setor">
+                                <span class="dot" th:classappend="${#strings.toLowerCase(u.setor.name())}"></span>
+                                <span th:text="${u.setor.name() == 'PNEUMATICA'} ? 'Pneumática' : 'Hidráulica'">Hidráulica</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="tag" th:classappend="${u.role.name() == 'ADMIN'} ? 'admin'"
+                                  th:text="${u.role.name() == 'ADMIN'} ? 'Administrador' : 'Usuário'">Usuário</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="rodape">
+                <span th:text="${#lists.size(usuarios)} + ' usuários'">3 usuários</span>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -3,12 +3,14 @@ package com.samueloliverz.Cota.controller;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
+import com.samueloliverz.Cota.dto.UsuarioResponse;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.Orcamento;
 import com.samueloliverz.Cota.model.OrdemManutencao;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
+import com.samueloliverz.Cota.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -32,6 +35,7 @@ public class PainelController {
 
     private final OrcamentoService service;
     private final OrdemManutencaoService manutencaoService;
+    private final UsuarioService usuarioService;
 
     @GetMapping
     public String inicio() {
@@ -112,5 +116,16 @@ public class PainelController {
 
         OrdemManutencao salva = manutencaoService.salvar(form.toEntity());
         return "redirect:/painel/manutencoes/nova?salva=" + salva.getId();
+    }
+
+    @GetMapping("/usuarios")
+    public String listarUsuarios(Model model) {
+        List<UsuarioResponse> usuarios = usuarioService.listarTodos().stream()
+                .map(UsuarioResponse::from)
+                .sorted(Comparator.comparing(UsuarioResponse::id))
+                .toList();
+
+        model.addAttribute("usuarios", usuarios);
+        return "telas/usuarios";
     }
 }
