@@ -2,6 +2,7 @@ package com.samueloliverz.Cota.controller;
 
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
+import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.Orcamento;
@@ -94,7 +95,21 @@ public class PainelController {
             return "telas/manutencao-form";
         }
 
+
         OrdemManutencao salva = manutencaoService.salvar(form.toEntity());
         return "redirect:/manutencoes/" + salva.getId() + "/pdf";
+    }
+
+    @GetMapping("/manutencoes")
+    public String listarManutencoes(@RequestParam(required = false) String cliente,
+                                    @RequestParam(defaultValue = "0") int pagina,
+                                    Model model) {
+        Pageable pageable = PageRequest.of(pagina, ITENS_POR_PAGINA, Sort.by(Sort.Direction.DESC, "id"));
+        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(cliente, pageable)
+                .map(OrdemManutencaoResponse::from);
+
+        model.addAttribute("ordens", ordens);
+        model.addAttribute("cliente", cliente);
+        return "telas/manutencoes";
     }
 }

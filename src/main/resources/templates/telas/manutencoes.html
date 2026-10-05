@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cota | Ordens de manutenção</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cota.css}">
+    <style>
+        .cliente { font-weight: 500; }
+        .telefone { display: block; font-size: 12px; color: #5B6474; margin-top: 2px; }
+        .problema { display: block; max-width: 360px; font-size: 13px; color: #344054; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<div class="app" th:with="admin=${usuarioLogado.role.name() == 'ADMIN'}">
+    <aside th:replace="~{fragments/sidebar :: sidebar('manutencoes')}"></aside>
+
+    <main class="conteudo">
+        <div class="topo">
+            <div>
+                <h1>Ordens de manutenção</h1>
+                <p class="subtitulo" th:text="${admin} ? 'Equipamentos de todos os setores.' : 'Equipamentos recebidos pelo seu setor.'">Equipamentos recebidos pelo seu setor.</p>
+            </div>
+            <a class="btn btn-primario" th:href="@{/painel/manutencoes/nova}">+ Nova manutenção</a>
+        </div>
+
+        <form method="get" th:action="@{/painel/manutencoes}">
+            <label class="busca">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6474" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+                <input type="search" name="cliente" th:value="${cliente}" placeholder="Buscar por cliente">
+            </label>
+        </form>
+
+        <div class="card tabela-card">
+            <div class="tabela-scroll">
+                <table class="tabela">
+                    <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Código</th>
+                        <th>Problema relatado</th>
+                        <th th:if="${admin}">Setor</th>
+                        <th>Data</th>
+                        <th class="direita">PDF</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="o : ${ordens.content}">
+                        <td class="mono" th:text="'#' + ${o.id}">#1</td>
+                        <td>
+                            <span class="cliente" th:text="${o.cliente}">Cliente</span>
+                            <span class="telefone" th:text="${o.telefone}">(11) 90000-0000</span>
+                        </td>
+                        <td><span class="tag" th:text="${o.produto.nome}">Cilindro</span></td>
+                        <td class="mono" th:text="${#strings.isEmpty(o.codigoProduto)} ? '—' : ${o.codigoProduto}">—</td>
+                        <td><span class="problema" th:text="${o.problemaRelatado}" th:title="${o.problemaRelatado}">Problema</span></td>
+                        <td th:if="${admin}">
+                            <span class="setor">
+                                <span class="dot" th:classappend="${#strings.toLowerCase(o.setor.name())}"></span>
+                                <span th:text="${o.setor.name() == 'PNEUMATICA'} ? 'Pneumática' : 'Hidráulica'">Hidráulica</span>
+                            </span>
+                        </td>
+                        <td class="data" th:text="${#temporals.format(o.dataCriacao, 'dd/MM/yyyy')}">01/01/2026</td>
+                        <td class="direita">
+                            <a class="icone" th:href="@{/manutencoes/{id}/pdf(id=${o.id})}" target="_blank" title="Abrir PDF">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M12 11v6M9 14l3 3 3-3"></path></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${ordens.isEmpty()}">
+                        <td th:colspan="${admin} ? 8 : 7" class="vazio">Nenhuma ordem de manutenção encontrada.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="rodape" th:if="${ordens.totalElements > 0}">
+                <span th:text="'Mostrando ' + ${ordens.numberOfElements} + ' de ' + ${ordens.totalElements}">Mostrando 10 de 12</span>
+                <div class="paginas">
+                    <a class="btn btn-secundario" th:if="${ordens.hasPrevious()}"
+                       th:href="@{/painel/manutencoes(cliente=${cliente}, pagina=${ordens.number - 1})}">‹ Anterior</a>
+                    <a class="btn btn-secundario" th:if="${ordens.hasNext()}"
+                       th:href="@{/painel/manutencoes(cliente=${cliente}, pagina=${ordens.number + 1})}">Próxima ›</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

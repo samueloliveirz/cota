@@ -60,3 +60,26 @@ textarea.in { height: auto; padding: 10px 12px; resize: vertical; line-height: 1
     .app { flex-direction: column; }
     .sidebar { width: auto; }
 }
+
+/* css manutencao */
+
+.busca { display: flex; align-items: center; gap: 8px; max-width: 380px; height: 44px; padding: 0 12px; border: 1px solid #D0D5DD; border-radius: 10px; background: #FFFFFF; }
+.busca:focus-within { border-color: #0E1726; box-shadow: 0 0 0 3px rgba(14, 23, 38, 0.10); }
+.busca input { flex: 1; border: 0; outline: none; font-family: inherit; font-size: 14px; background: transparent; }
+
+.tabela-card { padding: 0; overflow: hidden; }
+.tabela-scroll { overflow-x: auto; }
+.tabela { width: 100%; min-width: 960px; border-collapse: collapse; }
+.tabela th { text-align: left; padding: 12px 16px; background: #F9FAFB; border-bottom: 1px solid #E4E7EC; font-size: 12px; font-weight: 500; color: #5B6474; }
+.tabela td { padding: 12px 16px; border-bottom: 1px solid #EEF0F3; font-size: 14px; vertical-align: middle; }
+.tabela tr:hover td { background: #FAFBFC; }
+.direita { text-align: right; }
+.mono { font-family: 'Geist Mono', monospace; font-size: 13px; color: #4A5260; }
+.tag { padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 500; background: #F2F4F7; color: #344054; }
+.setor { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #344054; }
+.data { font-size: 13px; color: #5B6474; }
+.icone { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #5B6474; }
+a.icone:hover { background: #F2F4F7; color: #0E1726; }
+.vazio { text-align: center; padding: 48px; color: #5B6474; }
+.rodape { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; font-size: 13px; color: #5B6474; }
+.paginas { display: flex; gap: 8px; }
