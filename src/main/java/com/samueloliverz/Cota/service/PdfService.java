@@ -26,10 +26,10 @@ public class PdfService {
         context.setVariable("loja", loja);
 
         // 2. Escolhe o template pelo tipo (ex: orcamento-normal, orcamento-vale)
-        String template = "orcamento-" + orcamento.tipo().name().toLowerCase();
+        String template = "pdf/orcamento-" + orcamento.tipo().name().toLowerCase();
 
         // 3. Gera o PDF
-        return renderizar(template, context);
+        return renderizar("pdf/ordem-manutencao", context);
     }
 
     public byte[] gerarManutencao(OrdemManutencaoResponse ordem) {
