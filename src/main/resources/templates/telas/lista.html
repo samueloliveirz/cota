@@ -7,45 +7,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cota.css}">
     <style>
-        .busca { display: flex; align-items: center; gap: 8px; max-width: 380px; height: 44px; padding: 0 12px; border: 1px solid #D0D5DD; border-radius: 10px; background: #FFFFFF; }
-        .busca:focus-within { border-color: #0E1726; box-shadow: 0 0 0 3px rgba(14, 23, 38, 0.10); }
-        .busca input { flex: 1; border: 0; outline: none; font-family: inherit; font-size: 14px; background: transparent; }
-
         .abas { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #E4E7EC; }
         .aba { padding: 10px 12px; font-size: 14px; font-weight: 500; color: #5B6474; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
         .aba:hover { color: #0E1726; }
         .aba.ativa { color: #0E1726; border-bottom-color: #0E1726; }
         .aba .qtd { margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: #F2F4F7; font-size: 12px; color: #344054; }
 
-        .tabela-card { padding: 0; overflow: hidden; }
-        .tabela-scroll { overflow-x: auto; }
-        table { width: 100%; min-width: 960px; border-collapse: collapse; }
-        th { text-align: left; padding: 12px 16px; background: #F9FAFB; border-bottom: 1px solid #E4E7EC; font-size: 12px; font-weight: 500; color: #5B6474; }
-        td { padding: 12px 16px; border-bottom: 1px solid #EEF0F3; font-size: 14px; vertical-align: middle; }
-        tr:hover td { background: #FAFBFC; }
-        .direita { text-align: right; }
-        .mono { font-family: 'Geist Mono', monospace; font-size: 13px; color: #4A5260; }
         .empresa { font-weight: 500; }
         .cnpj { display: block; font-size: 12px; color: #5B6474; margin-top: 2px; }
-        .tag { padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 500; background: #F2F4F7; color: #344054; }
-        .setor { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #344054; }
-        .data { font-size: 13px; color: #5B6474; }
         .vencido { color: #B42318; }
 
         .status { padding: 4px 8px; border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid; }
         .status.enviado { background: #EEF4FF; color: #2E4BB0; border-color: #C7D7FE; }
-        .status.aguardando { background: #FFF6E8; color: #93460B; border-color: #F6D9AE; }
+        .status.aguardado { background: #FFF6E8; color: #93460B; border-color: #F6D9AE; }
         .status.fechado { background: #ECFDF3; color: #067647; border-color: #ABEFC6; }
-        .status.perdido { background: #FEF3F2; color: #B42318; border-color: #FECDCA; }
+        .status.nao_fechado { background: #FEF3F2; color: #B42318; border-color: #FECDCA; }
 
         .acoes { display: flex; justify-content: flex-end; gap: 4px; }
-        .icone { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #5B6474; }
-        a.icone:hover { background: #F2F4F7; color: #0E1726; }
         .icone.bloqueado { opacity: 0.35; cursor: not-allowed; }
-
-        .vazio { text-align: center; padding: 48px; color: #5B6474; }
-        .rodape { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; font-size: 13px; color: #5B6474; }
-        .paginas { display: flex; gap: 8px; }
     </style>
 </head>
 <body>
@@ -78,13 +57,13 @@
             <a class="aba" th:each="s : ${statusList}"
                th:href="@{/painel/orcamentos(status=${s}, empresa=${empresa})}"
                th:classappend="${statusAtual == s} ? 'ativa'">
-                <span th:text="${#strings.capitalize(#strings.toLowerCase(s.name()))}">Enviado</span><span class="qtd" th:text="${contagem[s.name()]}">0</span>
+                <span th:text="${s.nome}">Enviado</span><span class="qtd" th:text="${contagem[s.name()]}">0</span>
             </a>
         </nav>
 
         <div class="card tabela-card">
             <div class="tabela-scroll">
-                <table>
+                <table class="tabela">
                     <thead>
                     <tr>
                         <th>Nº</th>
@@ -121,7 +100,7 @@
                                         onchange="this.form.submit()">
                                     <option th:each="s : ${statusList}"
                                             th:value="${s}"
-                                            th:text="${#strings.capitalize(#strings.toLowerCase(s.name()))}"
+                                            th:text="${s.nome}"
                                             th:selected="${s == o.status}">Enviado</option>
                                 </select>
                             </form>
