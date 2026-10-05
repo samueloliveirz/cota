@@ -1,6 +1,7 @@
 package com.samueloliverz.Cota.model;
 
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
+import com.samueloliverz.Cota.enums.Setor;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,10 @@ public class OrdemManutencao {
 
     @Column(nullable = false)
     private LocalDateTime dataCriacao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Setor setor;
 
     @PrePersist
     public void prePersist() {
