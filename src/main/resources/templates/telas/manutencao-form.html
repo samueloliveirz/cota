@@ -4,92 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cota | Nova manutenção</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cota.css}">
     <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, sans-serif; background: #f4f5f7; color: #222; }
-        header { background: #1f2937; color: #fff; padding: 16px 24px; }
-        header h1 { margin: 0; font-size: 22px; }
-        main { max-width: 800px; margin: 24px auto; padding: 0 16px; }
-        .card { background: #fff; border-radius: 8px; padding: 24px; }
-        .linha { display: flex; gap: 16px; }
-        .campo { flex: 1; margin-bottom: 14px; }
-        label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        textarea { height: 80px; resize: vertical; }
-        .erros { background: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; }
-        .botoes { display: flex; gap: 10px; }
-        .botao { padding: 10px 18px; background: #1f2937; color: #fff; border: none; border-radius: 6px;
-            font-size: 14px; cursor: pointer; text-decoration: none; }
-        .botao.secundario { background: #6b7280; }
+        .migalha { font-size: 13px; color: #5B6474; }
+        .migalha a { color: #5B6474; text-decoration: none; }
+        .migalha a:hover { color: #0E1726; }
+
+        .formulario { max-width: 880px; display: flex; flex-direction: column; gap: 20px; }
+        .card h2 { margin: 0 0 16px; font-size: 16px; font-weight: 600; }
+        .linha { display: flex; flex-wrap: wrap; gap: 16px; }
+        .linha .campo { flex: 1 1 220px; }
+        .bloco + .bloco { margin-top: 16px; }
+        .opcional { font-weight: 400; color: #5B6474; }
+        .lbl-linha { display: flex; justify-content: space-between; }
+        .contador { font-size: 12px; color: #5B6474; font-variant-numeric: tabular-nums; }
+        .codigo { max-width: 280px; font-family: 'Geist Mono', monospace; }
+
+        .produtos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .produto input { position: absolute; opacity: 0; pointer-events: none; }
+        .produto span { display: flex; align-items: center; min-height: 52px; padding: 0 14px; border-radius: 10px; border: 1px solid #E4E7EC; background: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .produto span:hover { border-color: #98A2B3; }
+        .produto input:checked + span { border-color: #0E1726; box-shadow: 0 0 0 1px #0E1726; background: #F5F7FB; }
+        .produto input:focus-visible + span { outline: 2px solid #2B5BD7; outline-offset: 2px; }
+
+        .alerta-ok { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+        .alerta-ok a { color: #067647; font-weight: 600; }
+        .acoes-form { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Cota</h1>
-</header>
+<div class="app">
+    <aside th:replace="~{fragments/sidebar :: sidebar('nova-manutencao')}"></aside>
 
-<main>
-    <h2>Ordem de Manutenção</h2>
+    <main class="conteudo">
+        <div>
+            <div class="migalha">
+                <a th:href="@{/painel/manutencoes}">Ordens de manutenção</a> / Nova
+            </div>
+            <h1 style="margin-top: 8px;">Nova ordem de manutenção</h1>
+            <p class="subtitulo">Depois de salvar, é só abrir o PDF com as 2 vias.</p>
+        </div>
 
-    <div class="card">
+        <div class="alerta-ok formulario" th:if="${param.salva}">
+            <span th:text="'Ordem #' + ${param.salva} + ' salva.'">Ordem #1 salva.</span>
+            <a th:href="@{/manutencoes/{id}/pdf(id=${param.salva})}" target="_blank">Abrir PDF</a>
+        </div>
 
-        <!-- Mensagens de erro (só aparece se tiver) -->
-        <div class="erros" th:if="${erros != null}">
+        <div class="alerta-erro formulario" th:if="${erros != null}">
+            <strong>Corrija antes de salvar:</strong>
             <div th:each="erro : ${erros}" th:text="${erro}">Erro</div>
         </div>
 
-        <form method="post" th:action="@{/painel/manutencoes}">
+        <form class="formulario" method="post" th:action="@{/painel/manutencoes}">
 
-            <div class="linha">
-                <div class="campo">
-                    <label for="cliente">Nome do cliente</label>
-                    <input id="cliente" name="cliente" required
-                           th:value="${form?.cliente()}">
+            <section class="card">
+                <h2>Cliente</h2>
+                <div class="linha">
+                    <div class="campo">
+                        <label class="lbl" for="cliente">Nome do cliente</label>
+                        <input class="in" id="cliente" name="cliente" placeholder="Empresa ou pessoa"
+                               th:value="${form?.cliente()}">
+                    </div>
+                    <div class="campo">
+                        <label class="lbl" for="telefone">Telefone</label>
+                        <input class="in" id="telefone" name="telefone" type="tel" placeholder="(11) 90000-0000"
+                               th:value="${form?.telefone()}">
+                    </div>
                 </div>
-                <div class="campo">
-                    <label for="telefone">Telefone</label>
-                    <input id="telefone" name="telefone" required
-                           th:value="${form?.telefone()}">
-                </div>
-            </div>
+            </section>
 
-            <div class="linha">
-                <div class="campo">
-                    <label for="produto">Produto</label>
-                    <select id="produto" name="produto">
-                        <option th:each="p : ${produtos}"
-                                th:value="${p}"
-                                th:text="${p}"
-                                th:selected="${form != null and form.produto() == p}">CILINDRO</option>
-                    </select>
+            <section class="card">
+                <h2>Equipamento</h2>
+
+                <div class="campo bloco">
+                    <span class="lbl">Produto</span>
+                    <div class="produtos">
+                        <label class="produto" th:each="p : ${produtos}">
+                            <input type="radio" name="produto" th:value="${p}"
+                                   th:checked="${form != null} ? ${form.produto() == p} : ${p.name() == 'CILINDRO'}">
+                            <span th:text="${p.nome}">Cilindro</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="campo">
-                    <label for="codigoProduto">Código do produto</label>
-                    <input id="codigoProduto" name="codigoProduto"
+
+                <div class="campo bloco">
+                    <label class="lbl" for="codigoProduto">Código do produto <span class="opcional">(opcional)</span></label>
+                    <input class="in codigo" id="codigoProduto" name="codigoProduto" placeholder="Ex.: CHD-80-300"
                            th:value="${form?.codigoProduto()}">
                 </div>
-            </div>
 
-            <div class="campo">
-                <label for="problemaRelatado">Problema relatado</label>
-                <textarea id="problemaRelatado" name="problemaRelatado" required
-                          th:text="${form?.problemaRelatado()}"></textarea>
-            </div>
+                <div class="campo bloco">
+                    <div class="lbl-linha">
+                        <label class="lbl" for="problemaRelatado">Problema relatado</label>
+                        <span class="contador" data-de="problemaRelatado">0 / 1000</span>
+                    </div>
+                    <textarea class="in" id="problemaRelatado" name="problemaRelatado" rows="4" maxlength="1000"
+                              placeholder="O que o cliente disse que está acontecendo"
+                              th:text="${form?.problemaRelatado()}"></textarea>
+                </div>
 
-            <div class="campo">
-                <label for="observacao">Observações</label>
-                <textarea id="observacao" name="observacao"
-                          th:text="${form?.observacao()}"></textarea>
-            </div>
+                <div class="campo bloco">
+                    <div class="lbl-linha">
+                        <label class="lbl" for="observacao">Observação <span class="opcional">(opcional)</span></label>
+                        <span class="contador" data-de="observacao">0 / 1000</span>
+                    </div>
+                    <textarea class="in" id="observacao" name="observacao" rows="3" maxlength="1000"
+                              placeholder="Estado do equipamento, acessórios que vieram junto"
+                              th:text="${form?.observacao()}"></textarea>
+                </div>
+            </section>
 
-            <div class="botoes">
-                <button type="submit" class="botao">Gerar PDF</button>
-                <a class="botao secundario" th:href="@{/painel}">Voltar</a>
+            <div class="acoes-form">
+                <a class="btn btn-secundario" th:href="@{/painel/manutencoes}">Cancelar</a>
+                <button type="submit" class="btn btn-primario">Salvar ordem</button>
             </div>
         </form>
-    </div>
-</main>
+    </main>
+</div>
+
+<script>
+    document.querySelectorAll('.contador').forEach(contador => {
+        const campo = document.getElementById(contador.dataset.de);
+        const atualizar = () => contador.textContent = campo.value.length + ' / 1000';
+        campo.addEventListener('input', atualizar);
+        atualizar();
+    });
+</script>
 
 </body>
 </html>

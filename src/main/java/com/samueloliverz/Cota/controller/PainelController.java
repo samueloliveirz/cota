@@ -61,7 +61,9 @@ public class PainelController {
     }
 
     @GetMapping("/orcamentos/novo")
-    public String novoOrcamento() { return "telas/orcamento-form"; }
+    public String novoOrcamento() {
+        return "telas/orcamento-form";
+    }
 
     @GetMapping("/orcamentos/{id}/editar")
     public String editarOrcamento(@PathVariable Long id, Model model) {
@@ -73,6 +75,19 @@ public class PainelController {
 
         model.addAttribute("orcamentoId", id);
         return "telas/orcamento-form";
+    }
+
+    @GetMapping("/manutencoes")
+    public String listarManutencoes(@RequestParam(required = false) String cliente,
+                                    @RequestParam(defaultValue = "0") int pagina,
+                                    Model model) {
+        Pageable pageable = PageRequest.of(pagina, ITENS_POR_PAGINA, Sort.by(Sort.Direction.DESC, "id"));
+        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(cliente, pageable)
+                .map(OrdemManutencaoResponse::from);
+
+        model.addAttribute("ordens", ordens);
+        model.addAttribute("cliente", cliente);
+        return "telas/manutencoes";
     }
 
     @GetMapping("/manutencoes/nova")
@@ -95,21 +110,7 @@ public class PainelController {
             return "telas/manutencao-form";
         }
 
-
         OrdemManutencao salva = manutencaoService.salvar(form.toEntity());
-        return "redirect:/manutencoes/" + salva.getId() + "/pdf";
-    }
-
-    @GetMapping("/manutencoes")
-    public String listarManutencoes(@RequestParam(required = false) String cliente,
-                                    @RequestParam(defaultValue = "0") int pagina,
-                                    Model model) {
-        Pageable pageable = PageRequest.of(pagina, ITENS_POR_PAGINA, Sort.by(Sort.Direction.DESC, "id"));
-        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(cliente, pageable)
-                .map(OrdemManutencaoResponse::from);
-
-        model.addAttribute("ordens", ordens);
-        model.addAttribute("cliente", cliente);
-        return "telas/manutencoes";
+        return "redirect:/painel/manutencoes/nova?salva=" + salva.getId();
     }
 }
