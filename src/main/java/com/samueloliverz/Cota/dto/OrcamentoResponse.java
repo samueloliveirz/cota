@@ -18,6 +18,9 @@ public record OrcamentoResponse(
         Setor setor,
         String empresa,
         String cnpj,
+        String comprador,
+        String telefone,
+        String email,
         TipoRetirada tipoRetirada,
         String enderecoEnvio,
         FormaPagamento formaPagamento,
@@ -28,6 +31,7 @@ public record OrcamentoResponse(
         LocalDate dataValidade,
         List<ItemResponse> itens,
         BigDecimal subtotal,
+        BigDecimal desconto,
         BigDecimal frete,
         BigDecimal total
 ) {
@@ -38,6 +42,9 @@ public record OrcamentoResponse(
                 orcamento.getSetor(),
                 orcamento.getEmpresa(),
                 orcamento.getCnpj(),
+                orcamento.getComprador(),
+                orcamento.getTelefone(),
+                orcamento.getEmail(),
                 orcamento.getTipoRetirada(),
                 orcamento.getEnderecoEnvio(),
                 orcamento.getFormaPagamento(),
@@ -48,6 +55,7 @@ public record OrcamentoResponse(
                 orcamento.getDataValidade(),
                 orcamento.getItens().stream().map(ItemResponse::from).toList(),
                 orcamento.calcularSubtotal(),
+                orcamento.getDesconto(),
                 orcamento.getFrete(),
                 orcamento.calcularTotal()
         );

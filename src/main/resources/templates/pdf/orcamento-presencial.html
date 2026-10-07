@@ -58,6 +58,14 @@
             <td><b>Cliente:</b> <span th:text="${orcamento.empresa}"></span></td>
             <td th:if="${orcamento.cnpj != null}"><b>CNPJ:</b> <span th:text="${orcamento.cnpj}"></span></td>
         </tr>
+        <tr th:if="${orcamento.comprador != null or orcamento.telefone != null or orcamento.email != null}">
+            <td><span th:if="${orcamento.comprador != null}"><b>Comprador:</b> <span th:text="${orcamento.comprador}"></span></span></td>
+            <td>
+                <span th:if="${orcamento.telefone != null}"><b>Tel:</b> <span th:text="${orcamento.telefone}"></span></span>
+                <span th:if="${orcamento.telefone != null and orcamento.email != null}"> | </span>
+                <span th:if="${orcamento.email != null}"><b>E-mail:</b> <span th:text="${orcamento.email}"></span></span>
+            </td>
+        </tr>
 
         <tr>
             <td><b>Retirada:</b>
@@ -94,6 +102,10 @@
             <td class="direita">Subtotal:</td>
             <td class="direita" style="width: 120px;"
                 th:text="${#numbers.formatDecimal(orcamento.subtotal, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr th:if="${orcamento.desconto != null and orcamento.desconto.signum() > 0}">
+            <td class="direita">Desconto:</td>
+            <td class="direita" th:text="'- ' + ${#numbers.formatDecimal(orcamento.desconto, 1, 'POINT', 2, 'COMMA')}">- 0,00</td>
         </tr>
         <tr>
             <td class="direita">Frete:</td>

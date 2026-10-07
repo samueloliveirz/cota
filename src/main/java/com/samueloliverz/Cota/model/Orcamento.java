@@ -20,7 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Orcamento {
+public class  Orcamento {
 
     private static final int DIAS_VALIDADE = 20;
 
@@ -36,6 +36,16 @@ public class Orcamento {
 
     @Column(length = 14)
     private String cnpj;
+
+    private String comprador;
+
+    @Column(length = 30)
+    private String telefone;
+
+    private String email;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal desconto;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -92,7 +102,8 @@ public class Orcamento {
 
     public BigDecimal calcularTotal() {
         BigDecimal valorFrete = frete != null ? frete : BigDecimal.ZERO;
-        return calcularSubtotal().add(valorFrete);
+        BigDecimal valorDesconto = desconto != null ? desconto : BigDecimal.ZERO;
+        return calcularSubtotal().subtract(valorDesconto).add(valorFrete);
     }
 
     public LocalDate getDataValidade() {

@@ -57,6 +57,26 @@
     .resumo-linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
     .resumo-linha span:first-child { color: #5B6474; }
     .resumo .btn { justify-content: center; }
+
+    .desconto { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid #EEF0F3; border-bottom: 1px solid #EEF0F3; }
+    .desconto .lbl { font-size: 13px; color: #5B6474; }
+    .desconto-campos { display: flex; gap: 8px; }
+    .com-unidade { position: relative; display: block; }
+    .com-unidade.pct { flex: 0 0 92px; }
+    .com-unidade.rs { flex: 1; }
+    .com-unidade .in { width: 100%; }
+    .unidade { position: absolute; top: 50%; transform: translateY(-50%); font-size: 13px; color: #5B6474; pointer-events: none; }
+    .unidade.prefixo { left: 12px; }
+    .unidade.sufixo { right: 12px; }
+    .com-unidade.rs .in { padding-left: 36px; }
+    .com-unidade.pct .in { padding-right: 28px; }
+    .sem-setas { -moz-appearance: textfield; }
+    .sem-setas::-webkit-inner-spin-button, .sem-setas::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .aviso-desconto { font-size: 12px; color: #B42318; }
+    .linha-desconto span:last-child { color: #067647; }
+
+    .alerta-rascunho { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; background: #FFF6E8; border: 1px solid #F6D9AE; color: #93460B; font-size: 14px; }
+    .alerta-rascunho .btn { margin-left: auto; }
   </style>
 </head>
 <body>
@@ -74,6 +94,11 @@
     <div>
       <h1 id="titulo" th:text="${orcamentoId == null} ? 'Novo orçamento' : 'Editar orçamento #' + ${orcamentoId}">Novo orçamento</h1>
       <p class="subtitulo" th:text="${orcamentoId == null} ? 'Salvo no seu setor, com status Enviado e validade de 20 dias.' : 'Os itens salvos substituem os anteriores.'">Salvo no seu setor.</p>
+    </div>
+
+    <div id="avisoRascunho" class="alerta-rascunho escondido">
+      <span id="textoRascunho"></span>
+      <button type="button" id="descartarRascunho" class="btn btn-secundario btn-pequeno">Descartar rascunho</button>
     </div>
 
     <div id="erros" class="alerta-erro escondido"></div>
@@ -103,6 +128,20 @@
             <label class="campo">
               <span class="lbl">CNPJ <span class="dica" id="dicaCnpj"></span></span>
               <input class="in mono" id="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00">
+            </label>
+          </div>
+          <div class="grade" style="margin-top: 16px">
+            <label class="campo">
+              <span class="lbl">Comprador <span class="dica">(opcional)</span></span>
+              <input class="in" id="comprador" placeholder="Nome de quem pediu">
+            </label>
+            <label class="campo">
+              <span class="lbl">Telefone <span class="dica">(opcional)</span></span>
+              <input class="in" id="telefone" type="tel" placeholder="(11) 90000-0000">
+            </label>
+            <label class="campo">
+              <span class="lbl">E-mail <span class="dica">(opcional)</span></span>
+              <input class="in" id="email" type="email" placeholder="compras@empresa.com.br">
             </label>
           </div>
 
@@ -181,12 +220,29 @@
           <strong id="total">R$ 0,00</strong>
         </div>
         <div class="resumo-linha"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+        <div class="resumo-linha linha-desconto escondido" id="linhaDesconto"><span>Desconto</span><span id="valorDesconto">− R$ 0,00</span></div>
         <div class="resumo-linha"><span>Frete</span><span id="valorFrete">R$ 0,00</span></div>
+
+        <div class="desconto">
+          <span class="lbl">Desconto nos produtos</span>
+          <div class="desconto-campos">
+            <label class="com-unidade pct">
+              <input class="in sem-setas" id="descontoPercentual" type="number" min="0" max="100" step="0.01" placeholder="0" aria-label="Desconto em porcentagem">
+              <span class="unidade sufixo">%</span>
+            </label>
+            <label class="com-unidade rs">
+              <span class="unidade prefixo">R$</span>
+              <input class="in sem-setas" id="descontoValor" type="number" min="0" step="0.01" placeholder="0,00" aria-label="Desconto em reais">
+            </label>
+          </div>
+          <span class="aviso-desconto escondido" id="avisoDesconto">O desconto está maior que o valor dos produtos.</span>
+        </div>
+
         <div class="resumo-linha"><span>Tipo</span><span id="resumoTipo">Formalizado</span></div>
         <div class="resumo-linha"><span>Pagamento</span><span id="resumoPagamento">À vista</span></div>
         <div class="resumo-linha"><span>Válido até</span><span id="resumoValidade">—</span></div>
         <button type="button" class="btn btn-primario" id="salvar">Salvar orçamento</button>
-        <a class="btn btn-secundario" th:href="@{/painel/orcamentos}">Cancelar</a>
+        <a class="btn btn-secundario" id="cancelar" th:href="@{/painel/orcamentos}">Cancelar</a>
       </aside>
     </div>
   </main>
@@ -197,6 +253,16 @@
   const tabela = document.getElementById('itens');
   const escolhas = { tipo: 'FORMALIZADO', tipoRetirada: 'LOJA', formaPagamento: 'A_VISTA' };
   const ROTULOS = { FORMALIZADO: 'Formalizado', NORMAL: 'Normal', PRESENCIAL: 'Presencial', VALE: 'Vale' };
+  const CAMPOS_TEXTO = ['empresa', 'cnpj', 'comprador', 'telefone', 'email', 'enderecoEnvio', 'diasFaturamento', 'frete', 'observacao'];
+
+  let modoDesconto = 'valor';
+  let descontoAtual = 0;
+  let pronto = false;
+  let alterado = false;
+
+  function campo(id) {
+    return document.getElementById(id);
+  }
 
   function reais(valor) {
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -207,13 +273,17 @@
   }
 
   function texto(id) {
-    const valor = document.getElementById(id).value.trim();
+    const valor = campo(id).value.trim();
     return valor === '' ? null : valor;
   }
 
   function numero(id) {
-    const valor = document.getElementById(id).value;
+    const valor = campo(id).value;
     return valor === '' ? null : Number(valor);
+  }
+
+  function centavos(valor) {
+    return Math.round((valor + Number.EPSILON) * 100) / 100;
   }
 
   function lerCookie(nome) {
@@ -230,9 +300,9 @@
   }
 
   function atualizarCamposExtras() {
-    document.getElementById('campoEndereco').classList.toggle('escondido', escolhas.tipoRetirada !== 'SEDEX');
-    document.getElementById('campoDias').classList.toggle('escondido', escolhas.formaPagamento !== 'FATURADO');
-    document.getElementById('dicaCnpj').textContent = escolhas.tipo === 'PRESENCIAL' ? '(opcional no presencial)' : '';
+    campo('campoEndereco').classList.toggle('escondido', escolhas.tipoRetirada !== 'SEDEX');
+    campo('campoDias').classList.toggle('escondido', escolhas.formaPagamento !== 'FATURADO');
+    campo('dicaCnpj').textContent = escolhas.tipo === 'PRESENCIAL' ? '(opcional no presencial)' : '';
   }
 
   function adicionarItem(item = {}) {
@@ -253,6 +323,22 @@
     recalcular();
   }
 
+  function calcularDesconto(subtotal) {
+    const campoPercentual = campo('descontoPercentual');
+    const campoValor = campo('descontoValor');
+
+    if (modoDesconto === 'percentual') {
+      const percentual = Number(campoPercentual.value) || 0;
+      const valor = centavos(subtotal * percentual / 100);
+      campoValor.value = percentual ? valor.toFixed(2) : '';
+      return valor;
+    }
+
+    const valor = centavos(Number(campoValor.value) || 0);
+    campoPercentual.value = valor && subtotal ? centavos(valor / subtotal * 100) : '';
+    return valor;
+  }
+
   function recalcular() {
     let subtotal = 0;
 
@@ -263,21 +349,26 @@
       subtotal += quantidade * preco;
     });
 
+    subtotal = centavos(subtotal);
+    descontoAtual = calcularDesconto(subtotal);
     const frete = numero('frete') || 0;
     const dias = numero('diasFaturamento');
 
-    document.getElementById('subtotal').textContent = reais(subtotal);
-    document.getElementById('valorFrete').textContent = reais(frete);
-    document.getElementById('total').textContent = reais(subtotal + frete);
-    document.getElementById('resumoTipo').textContent = ROTULOS[escolhas.tipo];
-    document.getElementById('resumoPagamento').textContent = escolhas.formaPagamento === 'FATURADO'
+    campo('subtotal').textContent = reais(subtotal);
+    campo('valorDesconto').textContent = '− ' + reais(descontoAtual);
+    campo('linhaDesconto').classList.toggle('escondido', descontoAtual <= 0);
+    campo('avisoDesconto').classList.toggle('escondido', descontoAtual <= subtotal);
+    campo('valorFrete').textContent = reais(frete);
+    campo('total').textContent = reais(subtotal - descontoAtual + frete);
+    campo('resumoTipo').textContent = ROTULOS[escolhas.tipo];
+    campo('resumoPagamento').textContent = escolhas.formaPagamento === 'FATURADO'
             ? (dias ? `Faturado ${dias} dias` : 'Faturado')
             : 'À vista';
   }
 
   async function consultarCliente() {
-    const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
-    const caixa = document.getElementById('recorrencia');
+    const cnpj = campo('cnpj').value.replace(/\D/g, '');
+    const caixa = campo('recorrencia');
 
     if (cnpj.length !== 14) {
       caixa.classList.add('escondido');
@@ -290,14 +381,14 @@
     ]);
 
     const anteriores = historico.filter(o => String(o.id) !== String(orcamentoId));
-    const selo = document.getElementById('recSelo');
+    const selo = campo('recSelo');
     selo.textContent = recorrente ? 'Cliente recorrente' : 'Primeira compra';
     selo.className = 'selo ' + (recorrente ? 'recorrente' : 'novo');
-    document.getElementById('recTexto').textContent = recorrente
+    campo('recTexto').textContent = recorrente
             ? 'Já tem orçamento fechado com este CNPJ.'
             : 'Nenhum orçamento fechado com este CNPJ.';
 
-    const lista = document.getElementById('historico');
+    const lista = campo('historico');
     lista.innerHTML = '';
     anteriores.forEach(o => {
       const linha = document.createElement('div');
@@ -311,35 +402,119 @@
       lista.appendChild(linha);
     });
 
-    document.getElementById('btnHistorico').classList.toggle('escondido', anteriores.length === 0);
+    campo('btnHistorico').classList.toggle('escondido', anteriores.length === 0);
     caixa.classList.remove('escondido');
   }
 
+  function lerItensTela() {
+    return [...tabela.querySelectorAll('tr')].map(linha => ({
+      produto: linha.querySelector('.produto').value,
+      codigo: linha.querySelector('.codigo').value,
+      quantidade: linha.querySelector('.quantidade').value,
+      precoUnitario: linha.querySelector('.preco').value
+    }));
+  }
+
   function montarOrcamento() {
-    const itens = [...tabela.querySelectorAll('tr')].map(linha => ({
-      produto: linha.querySelector('.produto').value.trim(),
-      codigo: linha.querySelector('.codigo').value.trim() || null,
-      quantidade: Number(linha.querySelector('.quantidade').value),
-      precoUnitario: Number(linha.querySelector('.preco').value)
+    const itens = lerItensTela().map(item => ({
+      produto: item.produto.trim(),
+      codigo: item.codigo.trim() || null,
+      quantidade: Number(item.quantidade),
+      precoUnitario: Number(item.precoUnitario)
     }));
 
     return {
       tipo: escolhas.tipo,
       empresa: texto('empresa'),
       cnpj: texto('cnpj'),
+      comprador: texto('comprador'),
+      telefone: texto('telefone'),
+      email: texto('email'),
       tipoRetirada: escolhas.tipoRetirada,
       enderecoEnvio: escolhas.tipoRetirada === 'SEDEX' ? texto('enderecoEnvio') : null,
       formaPagamento: escolhas.formaPagamento,
       diasFaturamento: escolhas.formaPagamento === 'FATURADO' ? numero('diasFaturamento') : null,
       frete: numero('frete'),
+      desconto: descontoAtual > 0 ? descontoAtual : null,
       observacao: texto('observacao'),
       itens: itens
     };
   }
 
+  function preencher(dados) {
+    escolher('tipo', dados.tipo ?? 'FORMALIZADO');
+    escolher('tipoRetirada', dados.tipoRetirada ?? 'LOJA');
+    escolher('formaPagamento', dados.formaPagamento ?? 'A_VISTA');
+    CAMPOS_TEXTO.forEach(id => campo(id).value = dados[id] ?? '');
+    if (campo('frete').value === '') campo('frete').value = 0;
+
+    modoDesconto = dados.modoDesconto ?? 'valor';
+    campo('descontoValor').value = dados.desconto ?? '';
+    campo('descontoPercentual').value = dados.descontoPercentual ?? '';
+
+    tabela.innerHTML = '';
+    (dados.itens ?? []).forEach(item => adicionarItem(item));
+    if (tabela.children.length === 0) adicionarItem();
+    recalcular();
+  }
+
+  function chaveRascunho() {
+    return 'cota-rascunho-' + (orcamentoId ?? 'novo');
+  }
+
+  function guardarRascunho() {
+    const dados = {
+      tipo: escolhas.tipo,
+      tipoRetirada: escolhas.tipoRetirada,
+      formaPagamento: escolhas.formaPagamento,
+      itens: lerItensTela(),
+      modoDesconto: modoDesconto,
+      desconto: campo('descontoValor').value,
+      descontoPercentual: campo('descontoPercentual').value,
+      salvoEm: new Date().toISOString()
+    };
+    CAMPOS_TEXTO.forEach(id => dados[id] = campo(id).value);
+
+    try {
+      localStorage.setItem(chaveRascunho(), JSON.stringify(dados));
+    } catch (e) {
+    }
+  }
+
+  function lerRascunho() {
+    try {
+      const salvo = localStorage.getItem(chaveRascunho());
+      return salvo ? JSON.parse(salvo) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function apagarRascunho() {
+    try {
+      localStorage.removeItem(chaveRascunho());
+    } catch (e) {
+    }
+    campo('avisoRascunho').classList.add('escondido');
+  }
+
+  function mostrarAvisoRascunho(salvoEm) {
+    const data = new Date(salvoEm);
+    const quando = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+            + ' às ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    campo('textoRascunho').textContent = `Rascunho recuperado de ${quando}. Ainda não foi salvo.`;
+    campo('avisoRascunho').classList.remove('escondido');
+  }
+
+  function registrarAlteracao() {
+    if (!pronto) return;
+    alterado = true;
+    guardarRascunho();
+  }
+
   function mostrarErros(resposta) {
     const mensagens = resposta.campos ? Object.values(resposta.campos) : [resposta.mensagem];
-    const caixa = document.getElementById('erros');
+    const caixa = campo('erros');
     caixa.textContent = '';
     [...new Set(mensagens)].forEach(m => {
       const linha = document.createElement('div');
@@ -347,17 +522,17 @@
       caixa.appendChild(linha);
     });
     caixa.classList.remove('escondido');
-    document.getElementById('sucesso').classList.add('escondido');
+    campo('sucesso').classList.add('escondido');
     window.scrollTo(0, 0);
   }
 
   function mostrarSucesso(id) {
-    const caixa = document.getElementById('sucesso');
+    const caixa = campo('sucesso');
     caixa.innerHTML = `Orçamento <strong>#${id}</strong> salvo. <a href="/orcamentos/${id}/pdf" target="_blank">Abrir PDF</a> · <a href="/painel/orcamentos">Ver na lista</a>`;
     caixa.classList.remove('escondido');
-    document.getElementById('erros').classList.add('escondido');
-    document.getElementById('titulo').textContent = 'Editar orçamento #' + id;
-    document.getElementById('trilhaAtual').textContent = 'Editar #' + id;
+    campo('erros').classList.add('escondido');
+    campo('titulo').textContent = 'Editar orçamento #' + id;
+    campo('trilhaAtual').textContent = 'Editar #' + id;
     window.scrollTo(0, 0);
   }
 
@@ -372,13 +547,15 @@
     });
 
     if (resposta.status === 403) {
-      mostrarErros({ mensagem: 'Sessão expirada. Faça login de novo.' });
+      mostrarErros({ mensagem: 'Sessão expirada. Faça login de novo. O rascunho continua guardado neste navegador.' });
       return;
     }
 
     const corpo = await resposta.json();
 
     if (resposta.ok) {
+      apagarRascunho();
+      alterado = false;
       orcamentoId = corpo.id;
       mostrarSucesso(corpo.id);
     } else {
@@ -390,23 +567,38 @@
     const resposta = await fetch(`/orcamentos/${orcamentoId}`);
     if (!resposta.ok) {
       mostrarErros({ mensagem: 'Orçamento não encontrado.' });
-      return;
+      return false;
     }
 
     const o = await resposta.json();
-    escolher('tipo', o.tipo);
-    escolher('tipoRetirada', o.tipoRetirada);
-    escolher('formaPagamento', o.formaPagamento);
-    document.getElementById('empresa').value = o.empresa ?? '';
-    document.getElementById('cnpj').value = o.cnpj ?? '';
-    document.getElementById('enderecoEnvio').value = o.enderecoEnvio ?? '';
-    document.getElementById('diasFaturamento').value = o.diasFaturamento ?? '';
-    document.getElementById('frete').value = o.frete ?? 0;
-    document.getElementById('observacao').value = o.observacao ?? '';
-    document.getElementById('resumoValidade').textContent = dataBr(o.dataValidade);
-    o.itens.forEach(item => adicionarItem(item));
-    recalcular();
+    preencher(o);
+    campo('resumoValidade').textContent = dataBr(o.dataValidade);
+    return true;
+  }
+
+  async function iniciar() {
+    escolher('tipo', 'FORMALIZADO');
+    escolher('tipoRetirada', 'LOJA');
+    escolher('formaPagamento', 'A_VISTA');
+
+    if (orcamentoId) {
+      if (!await carregar()) return;
+    } else {
+      const validade = new Date();
+      validade.setDate(validade.getDate() + 20);
+      campo('resumoValidade').textContent = validade.toLocaleDateString('pt-BR');
+      adicionarItem();
+    }
+
+    const rascunho = lerRascunho();
+    if (rascunho) {
+      preencher(rascunho);
+      mostrarAvisoRascunho(rascunho.salvoEm);
+      alterado = true;
+    }
+
     consultarCliente();
+    pronto = true;
   }
 
   document.querySelectorAll('[data-grupo] button').forEach(botao =>
@@ -419,26 +611,47 @@
       recalcular();
     }
   });
-  document.getElementById('adicionar').addEventListener('click', () => adicionarItem());
-  document.getElementById('frete').addEventListener('input', recalcular);
-  document.getElementById('diasFaturamento').addEventListener('input', recalcular);
-  document.getElementById('cnpj').addEventListener('change', consultarCliente);
-  document.getElementById('btnHistorico').addEventListener('click', () =>
-          document.getElementById('historico').classList.toggle('escondido'));
-  document.getElementById('salvar').addEventListener('click', salvar);
+  campo('adicionar').addEventListener('click', () => adicionarItem());
+  campo('frete').addEventListener('input', recalcular);
+  campo('diasFaturamento').addEventListener('input', recalcular);
+  campo('descontoPercentual').addEventListener('input', () => {
+    modoDesconto = 'percentual';
+    recalcular();
+  });
+  campo('descontoValor').addEventListener('input', () => {
+    modoDesconto = 'valor';
+    recalcular();
+  });
+  campo('cnpj').addEventListener('change', consultarCliente);
+  campo('btnHistorico').addEventListener('click', () => campo('historico').classList.toggle('escondido'));
+  campo('salvar').addEventListener('click', salvar);
 
-  escolher('tipo', 'FORMALIZADO');
-  escolher('tipoRetirada', 'LOJA');
-  escolher('formaPagamento', 'A_VISTA');
+  const editor = document.querySelector('.editor');
+  editor.addEventListener('input', registrarAlteracao);
+  editor.addEventListener('click', evento => {
+    const botao = evento.target.closest('button');
+    if (botao && !['salvar', 'btnHistorico'].includes(botao.id)) registrarAlteracao();
+  });
 
-  if (orcamentoId) {
-    carregar();
-  } else {
-    const validade = new Date();
-    validade.setDate(validade.getDate() + 20);
-    document.getElementById('resumoValidade').textContent = validade.toLocaleDateString('pt-BR');
-    adicionarItem();
-  }
+  campo('descartarRascunho').addEventListener('click', () => {
+    apagarRascunho();
+    alterado = false;
+    location.reload();
+  });
+
+  campo('cancelar').addEventListener('click', () => {
+    apagarRascunho();
+    alterado = false;
+  });
+
+  window.addEventListener('beforeunload', evento => {
+    if (alterado) {
+      evento.preventDefault();
+      evento.returnValue = '';
+    }
+  });
+
+  iniciar();
 </script>
 
 </body>

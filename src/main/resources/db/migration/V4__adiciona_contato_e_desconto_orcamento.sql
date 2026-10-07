@@ -1,0 +1,4 @@
+ALTER TABLE orcamento ADD COLUMN comprador VARCHAR(255);
+ALTER TABLE orcamento ADD COLUMN telefone VARCHAR(30);
+ALTER TABLE orcamento ADD COLUMN email VARCHAR(255);
+ALTER TABLE orcamento ADD COLUMN desconto NUMERIC(12, 2);

@@ -46,13 +46,20 @@ public class OrcamentoService {
         orcamento.setEnderecoEnvio(dados.getEnderecoEnvio());
         orcamento.setFormaPagamento(dados.getFormaPagamento());
         orcamento.setDiasFaturamento(dados.getDiasFaturamento());
-        orcamento.setFrete(dados.getFrete());
+        orcamento.setDesconto(dados.getDesconto());
         orcamento.setObservacao(dados.getObservacao());
+        orcamento.setComprador(dados.getComprador());
+        orcamento.setTelefone(dados.getTelefone());
+        orcamento.setEmail(dados.getEmail());
 
         orcamento.getItens().clear();
         dados.getItens().forEach(orcamento::adicionarItem);
 
         validarRegras(orcamento);
+        if (orcamento.getDesconto() != null
+                && orcamento.getDesconto().compareTo(orcamento.calcularSubtotal()) > 0) {
+            throw new IllegalArgumentException("O desconto não pode ser maior que o valor dos produtos");
+        }
         return orcamento;
     }
 
@@ -149,6 +156,10 @@ public class OrcamentoService {
         if (orcamento.getFormaPagamento() == FormaPagamento.FATURADO
                 && (orcamento.getDiasFaturamento() == null || orcamento.getDiasFaturamento() <= 0)) {
             throw new IllegalArgumentException("Faturado precisa dos dias de faturamento");
+        }
+        if (orcamento.getDesconto() != null
+                && orcamento.getDesconto().compareTo(orcamento.calcularSubtotal()) > 0) {
+            throw new IllegalArgumentException("O desconto não pode ser maior que o valor dos produtos");
         }
     }
 
