@@ -52,6 +52,7 @@ public class Orcamento {
     @Column(precision = 12, scale = 2)
     private BigDecimal frete;
 
+    @Column(length = 1000)
     private String observacao;
 
     @Enumerated(EnumType.STRING)

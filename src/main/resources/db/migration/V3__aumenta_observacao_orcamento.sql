@@ -1,0 +1,1 @@
+ALTER TABLE orcamento ALTER COLUMN observacao TYPE VARCHAR(1000);

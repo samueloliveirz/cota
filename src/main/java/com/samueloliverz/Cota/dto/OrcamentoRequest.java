@@ -9,20 +9,22 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public record OrcamentoRequest(
         @NotNull(message = "Informe o tipo do orçamento") TipoOrcamento tipo,
-        @NotBlank(message = "Informe o nome da empresa") String empresa,
+        @NotBlank(message = "Informe o nome da empresa")
+        @Size(max = 255, message = "O nome da empresa pode ter no máximo 255 caracteres") String empresa,
         String cnpj,
         @NotNull(message = "Informe o tipo de retirada") TipoRetirada tipoRetirada,
-        String enderecoEnvio,
+        @Size(max = 255, message = "O endereço pode ter no máximo 255 caracteres") String enderecoEnvio,
         @NotNull(message = "Informe a forma de pagamento") FormaPagamento formaPagamento,
         Integer diasFaturamento,
         @PositiveOrZero(message = "O frete não pode ser negativo") BigDecimal frete,
-        String observacao,
+        @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao,
         @NotEmpty(message = "Adicione pelo menos um item") @Valid List<ItemRequest> itens
 ) {
     public Orcamento toEntity() {
