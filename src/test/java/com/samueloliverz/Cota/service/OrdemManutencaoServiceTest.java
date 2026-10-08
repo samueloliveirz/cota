@@ -4,6 +4,7 @@ import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.Role;
 import com.samueloliverz.Cota.enums.Setor;
 import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
+import com.samueloliverz.Cota.model.ItemManutencao;
 import com.samueloliverz.Cota.model.OrdemManutencao;
 import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.repository.OrdemManutencaoRepository;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,12 +49,19 @@ class OrdemManutencaoServiceTest {
 
     private OrdemManutencao ordem(Setor setor) {
         OrdemManutencao ordem = new OrdemManutencao();
-        ordem.setCliente("Prensas Diadema");
+        ordem.setEmpresa("Prensas Diadema");
         ordem.setTelefone("(11) 98765-1200");
-        ordem.setProduto(ProdutoManutencao.CILINDRO);
+        ordem.adicionarItem(item(ProdutoManutencao.CILINDRO, 1));
         ordem.setProblemaRelatado("Vazamento pela haste");
         ordem.setSetor(setor);
         return ordem;
+    }
+
+    private ItemManutencao item(ProdutoManutencao produto, int quantidade) {
+        ItemManutencao item = new ItemManutencao();
+        item.setProduto(produto);
+        item.setQuantidade(quantidade);
+        return item;
     }
 
     @Test
@@ -70,24 +79,24 @@ class OrdemManutencaoServiceTest {
     void usuarioComumDeveBuscarSoNoProprioSetor() {
         when(usuarioLogado.isAdmin()).thenReturn(false);
         when(usuarioLogado.get()).thenReturn(usuario(Setor.HIDRAULICA, Role.USER));
-        when(repository.findByClienteContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable))
+        when(repository.findByEmpresaContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable))
                 .thenReturn(Page.empty());
 
         service.buscar("prensas", pageable);
 
-        verify(repository).findByClienteContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable);
-        verify(repository, never()).findByClienteContainingIgnoreCase(any(), any());
+        verify(repository).findByEmpresaContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable);
+        verify(repository, never()).findByEmpresaContainingIgnoreCase(any(), any());
     }
 
     @Test
     void adminDeveBuscarEmTodosOsSetores() {
         when(usuarioLogado.isAdmin()).thenReturn(true);
-        when(repository.findByClienteContainingIgnoreCase("", pageable)).thenReturn(Page.empty());
+        when(repository.findByEmpresaContainingIgnoreCase("", pageable)).thenReturn(Page.empty());
 
         service.buscar(null, pageable);
 
-        verify(repository).findByClienteContainingIgnoreCase("", pageable);
-        verify(repository, never()).findByClienteContainingIgnoreCaseAndSetor(any(), any(), any());
+        verify(repository).findByEmpresaContainingIgnoreCase("", pageable);
+        verify(repository, never()).findByEmpresaContainingIgnoreCaseAndSetor(any(), any(), any());
     }
 
     @Test
@@ -118,11 +127,28 @@ class OrdemManutencaoServiceTest {
         when(usuarioLogado.isAdmin()).thenReturn(true);
 
         OrdemManutencao dados = ordem(Setor.HIDRAULICA);
-        dados.setCliente("Outro cliente");
+        dados.setEmpresa("Outra empresa");
 
         OrdemManutencao atualizada = service.atualizar(1L, dados);
 
-        assertThat(atualizada.getCliente()).isEqualTo("Outro cliente");
+        assertThat(atualizada.getEmpresa()).isEqualTo("Outra empresa");
         assertThat(atualizada.getSetor()).isEqualTo(Setor.PNEUMATICA);
+    }
+
+    @Test
+    void atualizarDeveTrocarOsEquipamentos() {
+        OrdemManutencao existente = ordem(Setor.HIDRAULICA);
+        when(repository.findById(1L)).thenReturn(Optional.of(existente));
+        when(usuarioLogado.isAdmin()).thenReturn(true);
+
+        OrdemManutencao dados = ordem(Setor.HIDRAULICA);
+        dados.substituirItens(List.of(item(ProdutoManutencao.BOMBA, 2), item(ProdutoManutencao.VALVULA, 1)));
+
+        OrdemManutencao atualizada = service.atualizar(1L, dados);
+
+        assertThat(atualizada.getItens())
+                .extracting(ItemManutencao::getProduto)
+                .containsExactly(ProdutoManutencao.BOMBA, ProdutoManutencao.VALVULA);
+        assertThat(atualizada.getItens()).allMatch(item -> item.getOrdem() == atualizada);
     }
 }

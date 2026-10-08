@@ -12,7 +12,7 @@ public interface OrdemManutencaoRepository extends JpaRepository<OrdemManutencao
 
     List<OrdemManutencao> findBySetor(Setor setor);
 
-    Page<OrdemManutencao> findByClienteContainingIgnoreCase(String cliente, Pageable pageable);
+    Page<OrdemManutencao> findByEmpresaContainingIgnoreCase(String empresa, Pageable pageable);
 
-    Page<OrdemManutencao> findByClienteContainingIgnoreCaseAndSetor(String cliente, Setor setor, Pageable pageable);
+    Page<OrdemManutencao> findByEmpresaContainingIgnoreCaseAndSetor(String empresa, Setor setor, Pageable pageable);
 }

@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/cota.css}">
     <style>
         .cliente { font-weight: 500; }
+        .equipamentos { display: flex; flex-wrap: wrap; gap: 4px; max-width: 260px; }
         .telefone { display: block; font-size: 12px; color: #5B6474; margin-top: 2px; }
         .problema { display: block; max-width: 360px; font-size: 13px; color: #344054; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
@@ -29,7 +30,7 @@
         <form method="get" th:action="@{/painel/manutencoes}">
             <label class="busca">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6474" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-                <input type="search" name="cliente" th:value="${cliente}" placeholder="Buscar por cliente">
+                <input type="search" name="empresa" th:value="${empresa}" placeholder="Buscar por empresa">
             </label>
         </form>
 
@@ -39,9 +40,8 @@
                     <thead>
                     <tr>
                         <th>Nº</th>
-                        <th>Cliente</th>
-                        <th>Produto</th>
-                        <th>Código</th>
+                        <th>Empresa</th>
+                        <th>Equipamentos</th>
                         <th>Problema relatado</th>
                         <th th:if="${admin}">Setor</th>
                         <th>Data</th>
@@ -52,11 +52,19 @@
                     <tr th:each="o : ${ordens.content}">
                         <td class="mono" th:text="'#' + ${o.id}">#1</td>
                         <td>
-                            <span class="cliente" th:text="${o.cliente}">Cliente</span>
-                            <span class="telefone" th:text="${o.telefone}">(11) 90000-0000</span>
+                            <span class="cliente" th:text="${o.empresa}">Empresa</span>
+                            <span class="telefone">
+                                <span th:if="${o.comprador != null}" th:text="${o.comprador} + ' - '">Fulano - </span>
+                                <span th:text="${o.telefone}">(11) 90000-0000</span>
+                            </span>
                         </td>
-                        <td><span class="tag" th:text="${o.produto.nome}">Cilindro</span></td>
-                        <td class="mono" th:text="${#strings.isEmpty(o.codigoProduto)} ? '—' : ${o.codigoProduto}">—</td>
+                        <td>
+                            <div class="equipamentos">
+                                <span class="tag" th:each="item : ${o.itens}"
+                                      th:text="${item.quantidade > 1} ? ${item.produto.nome + ' ×' + item.quantidade} : ${item.produto.nome}"
+                                      th:title="${item.codigo}">Cilindro</span>
+                            </div>
+                        </td>
                         <td><span class="problema" th:text="${o.problemaRelatado}" th:title="${o.problemaRelatado}">Problema</span></td>
                         <td th:if="${admin}">
                             <span class="setor">
@@ -72,7 +80,7 @@
                         </td>
                     </tr>
                     <tr th:if="${ordens.isEmpty()}">
-                        <td th:colspan="${admin} ? 8 : 7" class="vazio">Nenhuma ordem de manutenção encontrada.</td>
+                        <td th:colspan="${admin} ? 7 : 6" class="vazio">Nenhuma ordem de manutenção encontrada.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -82,9 +90,9 @@
                 <span th:text="'Mostrando ' + ${ordens.numberOfElements} + ' de ' + ${ordens.totalElements}">Mostrando 10 de 12</span>
                 <div class="paginas">
                     <a class="btn btn-secundario" th:if="${ordens.hasPrevious()}"
-                       th:href="@{/painel/manutencoes(cliente=${cliente}, pagina=${ordens.number - 1})}">‹ Anterior</a>
+                       th:href="@{/painel/manutencoes(empresa=${empresa}, pagina=${ordens.number - 1})}">‹ Anterior</a>
                     <a class="btn btn-secundario" th:if="${ordens.hasNext()}"
-                       th:href="@{/painel/manutencoes(cliente=${cliente}, pagina=${ordens.number + 1})}">Próxima ›</a>
+                       th:href="@{/painel/manutencoes(empresa=${empresa}, pagina=${ordens.number + 1})}">Próxima ›</a>
                 </div>
             </div>
         </div>

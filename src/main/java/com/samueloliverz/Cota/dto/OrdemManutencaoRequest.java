@@ -1,27 +1,37 @@
 package com.samueloliverz.Cota.dto;
 
-import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.model.OrdemManutencao;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public record OrdemManutencaoRequest(
-        @NotBlank(message = "Informe o nome do cliente") String cliente,
-        @NotBlank(message = "Informe o telefone") String telefone,
-        @NotNull(message = "Informe o produto") ProdutoManutencao produto,
-        String codigoProduto,
-        @NotBlank(message = "Informe o problema relatado") String problemaRelatado,
-        String observacao
+        @NotBlank(message = "Informe a empresa")
+        @Size(max = 255, message = "Nome da empresa muito longo") String empresa,
+        @Size(max = 255, message = "Nome do comprador muito longo") String comprador,
+        @NotBlank(message = "Informe o telefone")
+        @Size(max = 255, message = "Telefone muito longo") String telefone,
+        @Email(message = "E-mail inválido")
+        @Size(max = 255, message = "E-mail muito longo") String email,
+        @NotEmpty(message = "Adicione pelo menos um equipamento") @Valid List<ItemManutencaoRequest> itens,
+        @NotBlank(message = "Informe o problema relatado")
+        @Size(max = 1000, message = "O problema relatado pode ter no máximo 1000 caracteres") String problemaRelatado,
+        @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao
 ) {
 
     public OrdemManutencao toEntity() {
-        OrdemManutencao ordemManutencao = new OrdemManutencao();
-        ordemManutencao.setCliente(cliente);
-        ordemManutencao.setTelefone(telefone);
-        ordemManutencao.setProduto(produto);
-        ordemManutencao.setCodigoProduto(codigoProduto);
-        ordemManutencao.setProblemaRelatado(problemaRelatado);
-        ordemManutencao.setObservacao(observacao);
-        return ordemManutencao;
+        OrdemManutencao ordem = new OrdemManutencao();
+        ordem.setEmpresa(empresa);
+        ordem.setComprador(comprador);
+        ordem.setTelefone(telefone);
+        ordem.setEmail(email);
+        itens.forEach(item -> ordem.adicionarItem(item.toEntity()));
+        ordem.setProblemaRelatado(problemaRelatado);
+        ordem.setObservacao(observacao);
+        return ordem;
     }
 }

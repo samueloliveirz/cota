@@ -1,14 +1,12 @@
 package com.samueloliverz.Cota.controller;
 
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
-import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
 import com.samueloliverz.Cota.dto.UsuarioRequest;
 import com.samueloliverz.Cota.dto.UsuarioResponse;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.Orcamento;
-import com.samueloliverz.Cota.model.OrdemManutencao;
 import com.samueloliverz.Cota.model.Usuario;
 import com.samueloliverz.Cota.service.OrcamentoService;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
@@ -85,15 +83,15 @@ public class PainelController {
     }
 
     @GetMapping("/manutencoes")
-    public String listarManutencoes(@RequestParam(required = false) String cliente,
+    public String listarManutencoes(@RequestParam(required = false) String empresa,
                                     @RequestParam(defaultValue = "0") int pagina,
                                     Model model) {
         Pageable pageable = PageRequest.of(pagina, ITENS_POR_PAGINA, Sort.by(Sort.Direction.DESC, "id"));
-        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(cliente, pageable)
+        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(empresa, pageable)
                 .map(OrdemManutencaoResponse::from);
 
         model.addAttribute("ordens", ordens);
-        model.addAttribute("cliente", cliente);
+        model.addAttribute("empresa", empresa);
         return "telas/manutencoes";
     }
 
@@ -101,21 +99,6 @@ public class PainelController {
     public String novaManutencao(Model model) {
         model.addAttribute("produtos", ProdutoManutencao.values());
         return "telas/manutencao-form";
-    }
-
-    @PostMapping("/manutencoes")
-    public String salvarManutencao(@Valid @ModelAttribute("form") OrdemManutencaoRequest form,
-                                   BindingResult resultado,
-                                   Model model) {
-
-        if (resultado.hasErrors()) {
-            model.addAttribute("erros", mensagens(resultado));
-            model.addAttribute("produtos", ProdutoManutencao.values());
-            return "telas/manutencao-form";
-        }
-
-        OrdemManutencao salva = manutencaoService.salvar(form.toEntity());
-        return "redirect:/painel/manutencoes/nova?salva=" + salva.getId();
     }
 
     @GetMapping("/usuarios")

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,10 +30,11 @@ public class OrdemManutencaoService {
     public OrdemManutencao atualizar(Long id, OrdemManutencao dados) {
         OrdemManutencao ordem = buscarPorId(id);
 
-        ordem.setCliente(dados.getCliente());
+        ordem.setEmpresa(dados.getEmpresa());
+        ordem.setComprador(dados.getComprador());
         ordem.setTelefone(dados.getTelefone());
-        ordem.setProduto(dados.getProduto());
-        ordem.setCodigoProduto(dados.getCodigoProduto());
+        ordem.setEmail(dados.getEmail());
+        ordem.substituirItens(new ArrayList<>(dados.getItens()));
         ordem.setProblemaRelatado(dados.getProblemaRelatado());
         ordem.setObservacao(dados.getObservacao());
 
@@ -46,13 +48,13 @@ public class OrdemManutencaoService {
         return repository.findBySetor(setorDoUsuario());
     }
 
-    public Page<OrdemManutencao> buscar(String cliente, Pageable pageable) {
-        String termo = cliente == null ? "" : cliente.trim();
+    public Page<OrdemManutencao> buscar(String empresa, Pageable pageable) {
+        String termo = empresa == null ? "" : empresa.trim();
 
         if (usuarioLogado.isAdmin()) {
-            return repository.findByClienteContainingIgnoreCase(termo, pageable);
+            return repository.findByEmpresaContainingIgnoreCase(termo, pageable);
         }
-        return repository.findByClienteContainingIgnoreCaseAndSetor(termo, setorDoUsuario(), pageable);
+        return repository.findByEmpresaContainingIgnoreCaseAndSetor(termo, setorDoUsuario(), pageable);
     }
 
     public OrdemManutencao buscarPorId(Long id) {

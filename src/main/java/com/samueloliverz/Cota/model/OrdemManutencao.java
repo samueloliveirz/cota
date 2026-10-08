@@ -1,6 +1,5 @@
 package com.samueloliverz.Cota.model;
 
-import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.Setor;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,15 +21,16 @@ public class OrdemManutencao {
     private Long id;
 
     @Column(nullable = false)
-    private String cliente;
+    private String empresa;
+
+    private String comprador;
 
     private String telefone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProdutoManutencao produto;
+    private String email;
 
-    private String codigoProduto;
+    @OneToMany(mappedBy = "ordem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemManutencao> itens = new ArrayList<>();
 
     @Column(nullable = false, length = 1000)
     private String problemaRelatado;
@@ -46,5 +48,15 @@ public class OrdemManutencao {
     @PrePersist
     public void prePersist() {
         this.dataCriacao = LocalDateTime.now();
+    }
+
+    public void adicionarItem(ItemManutencao item) {
+        item.setOrdem(this);
+        itens.add(item);
+    }
+
+    public void substituirItens(List<ItemManutencao> novos) {
+        itens.clear();
+        novos.forEach(this::adicionarItem);
     }
 }

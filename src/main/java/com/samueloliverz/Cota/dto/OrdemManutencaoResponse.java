@@ -1,17 +1,18 @@
 package com.samueloliverz.Cota.dto;
 
-import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.Setor;
 import com.samueloliverz.Cota.model.OrdemManutencao;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record OrdemManutencaoResponse(
         Long id,
-        String cliente,
+        String empresa,
+        String comprador,
         String telefone,
-        ProdutoManutencao produto,
-        String codigoProduto,
+        String email,
+        List<ItemManutencaoResponse> itens,
         String problemaRelatado,
         String observacao,
         Setor setor,
@@ -21,10 +22,11 @@ public record OrdemManutencaoResponse(
     public static OrdemManutencaoResponse from(OrdemManutencao ordem) {
         return new OrdemManutencaoResponse(
                 ordem.getId(),
-                ordem.getCliente(),
+                ordem.getEmpresa(),
+                ordem.getComprador(),
                 ordem.getTelefone(),
-                ordem.getProduto(),
-                ordem.getCodigoProduto(),
+                ordem.getEmail(),
+                ordem.getItens().stream().map(ItemManutencaoResponse::from).toList(),
                 ordem.getProblemaRelatado(),
                 ordem.getObservacao(),
                 ordem.getSetor(),

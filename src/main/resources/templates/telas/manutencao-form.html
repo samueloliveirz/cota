@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cota.css}">
     <style>
+        .escondido { display: none !important; }
         .migalha { font-size: 13px; color: #5B6474; }
         .migalha a { color: #5B6474; text-decoration: none; }
         .migalha a:hover { color: #0E1726; }
@@ -15,18 +16,22 @@
         .card h2 { margin: 0 0 16px; font-size: 16px; font-weight: 600; }
         .linha { display: flex; flex-wrap: wrap; gap: 16px; }
         .linha .campo { flex: 1 1 220px; }
+        .linha + .linha { margin-top: 16px; }
         .bloco + .bloco { margin-top: 16px; }
         .opcional { font-weight: 400; color: #5B6474; }
         .lbl-linha { display: flex; justify-content: space-between; }
         .contador { font-size: 12px; color: #5B6474; font-variant-numeric: tabular-nums; }
-        .codigo { max-width: 280px; font-family: 'Geist Mono', monospace; }
 
-        .produtos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-        .produto input { position: absolute; opacity: 0; pointer-events: none; }
-        .produto span { display: flex; align-items: center; min-height: 52px; padding: 0 14px; border-radius: 10px; border: 1px solid #E4E7EC; background: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; }
-        .produto span:hover { border-color: #98A2B3; }
-        .produto input:checked + span { border-color: #0E1726; box-shadow: 0 0 0 1px #0E1726; background: #F5F7FB; }
-        .produto input:focus-visible + span { outline: 2px solid #2B5BD7; outline-offset: 2px; }
+        .itens-scroll { overflow-x: auto; }
+        .itens { width: 100%; min-width: 520px; border-collapse: collapse; }
+        .itens th { text-align: left; font-size: 12px; font-weight: 500; color: #5B6474; padding: 0 6px 8px; }
+        .itens td { padding: 4px 6px; }
+        .itens .in { height: 38px; width: 100%; }
+        .itens select.in { background: #FFFFFF; }
+        .mono { font-family: 'Geist Mono', monospace; }
+        .remover { width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; color: #5B6474; cursor: pointer; }
+        .remover:hover { background: #FEF3F2; color: #B42318; }
+        .remover:disabled { visibility: hidden; }
 
         .alerta-ok { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
         .alerta-ok a { color: #067647; font-weight: 600; }
@@ -47,62 +52,65 @@
             <p class="subtitulo">Depois de salvar, é só abrir o PDF com as 2 vias.</p>
         </div>
 
-        <div class="alerta-ok formulario" th:if="${param.salva}">
-            <span th:text="'Ordem #' + ${param.salva} + ' salva.'">Ordem #1 salva.</span>
-            <a th:href="@{/manutencoes/{id}/pdf(id=${param.salva})}" target="_blank">Abrir PDF</a>
-        </div>
+        <div id="sucesso" class="alerta-ok formulario escondido"></div>
+        <div id="erros" class="alerta-erro formulario escondido"></div>
 
-        <div class="alerta-erro formulario" th:if="${erros != null}">
-            <strong>Corrija antes de salvar:</strong>
-            <div th:each="erro : ${erros}" th:text="${erro}">Erro</div>
-        </div>
-
-        <form class="formulario" method="post" th:action="@{/painel/manutencoes}">
+        <div class="formulario" id="ficha">
 
             <section class="card">
                 <h2>Cliente</h2>
                 <div class="linha">
                     <div class="campo">
-                        <label class="lbl" for="cliente">Nome do cliente</label>
-                        <input class="in" id="cliente" name="cliente" placeholder="Empresa ou pessoa"
-                               th:value="${form?.cliente()}">
+                        <label class="lbl" for="empresa">Empresa</label>
+                        <input class="in" id="empresa" placeholder="Razão social ou nome">
                     </div>
                     <div class="campo">
+                        <label class="lbl" for="comprador">Comprador <span class="opcional">(opcional)</span></label>
+                        <input class="in" id="comprador" placeholder="Nome de quem trouxe">
+                    </div>
+                </div>
+                <div class="linha">
+                    <div class="campo">
                         <label class="lbl" for="telefone">Telefone</label>
-                        <input class="in" id="telefone" name="telefone" type="tel" placeholder="(11) 90000-0000"
-                               th:value="${form?.telefone()}">
+                        <input class="in" id="telefone" type="tel" placeholder="(11) 90000-0000">
+                    </div>
+                    <div class="campo">
+                        <label class="lbl" for="email">E-mail <span class="opcional">(opcional)</span></label>
+                        <input class="in" id="email" type="email" placeholder="compras@empresa.com.br">
                     </div>
                 </div>
             </section>
 
             <section class="card">
-                <h2>Equipamento</h2>
-
-                <div class="campo bloco">
-                    <span class="lbl">Produto</span>
-                    <div class="produtos">
-                        <label class="produto" th:each="p : ${produtos}">
-                            <input type="radio" name="produto" th:value="${p}"
-                                   th:checked="${form != null} ? ${form.produto() == p} : ${p.name() == 'CILINDRO'}">
-                            <span th:text="${p.nome}">Cilindro</span>
-                        </label>
-                    </div>
+                <h2>Equipamentos</h2>
+                <div class="itens-scroll">
+                    <table class="itens">
+                        <thead>
+                        <tr>
+                            <th style="width: 34%">Equipamento</th>
+                            <th>Código <span class="opcional">(opcional)</span></th>
+                            <th style="width: 90px">Qtd</th>
+                            <th style="width: 44px"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="itens"></tbody>
+                    </table>
                 </div>
+                <button type="button" class="btn btn-secundario" id="adicionar" style="margin-top: 12px">+ Adicionar equipamento</button>
 
-                <div class="campo bloco">
-                    <label class="lbl" for="codigoProduto">Código do produto <span class="opcional">(opcional)</span></label>
-                    <input class="in codigo" id="codigoProduto" name="codigoProduto" placeholder="Ex.: CHD-80-300"
-                           th:value="${form?.codigoProduto()}">
-                </div>
+                <template id="opcoesProduto">
+                    <option th:each="p : ${produtos}" th:value="${p}" th:text="${p.nome}">Cilindro</option>
+                </template>
+            </section>
 
+            <section class="card">
                 <div class="campo bloco">
                     <div class="lbl-linha">
                         <label class="lbl" for="problemaRelatado">Problema relatado</label>
                         <span class="contador" data-de="problemaRelatado">0 / 1000</span>
                     </div>
-                    <textarea class="in" id="problemaRelatado" name="problemaRelatado" rows="4" maxlength="1000"
-                              placeholder="O que o cliente disse que está acontecendo"
-                              th:text="${form?.problemaRelatado()}"></textarea>
+                    <textarea class="in" id="problemaRelatado" rows="4" maxlength="1000"
+                              placeholder="O que o cliente disse que está acontecendo"></textarea>
                 </div>
 
                 <div class="campo bloco">
@@ -110,27 +118,161 @@
                         <label class="lbl" for="observacao">Observação <span class="opcional">(opcional)</span></label>
                         <span class="contador" data-de="observacao">0 / 1000</span>
                     </div>
-                    <textarea class="in" id="observacao" name="observacao" rows="3" maxlength="1000"
-                              placeholder="Estado do equipamento, acessórios que vieram junto"
-                              th:text="${form?.observacao()}"></textarea>
+                    <textarea class="in" id="observacao" rows="3" maxlength="1000"
+                              placeholder="Estado dos equipamentos, acessórios que vieram junto"></textarea>
                 </div>
             </section>
 
             <div class="acoes-form">
                 <a class="btn btn-secundario" th:href="@{/painel/manutencoes}">Cancelar</a>
-                <button type="submit" class="btn btn-primario">Salvar ordem</button>
+                <button type="button" class="btn btn-primario" id="salvar">Salvar ordem</button>
             </div>
-        </form>
+        </div>
     </main>
 </div>
 
 <script>
+    const tabela = document.getElementById('itens');
+    const opcoes = document.getElementById('opcoesProduto').innerHTML;
+    let alterado = false;
+
+    function campo(id) {
+        return document.getElementById(id);
+    }
+
+    function texto(id) {
+        const valor = campo(id).value.trim();
+        return valor === '' ? null : valor;
+    }
+
+    function lerCookie(nome) {
+        const item = document.cookie.split('; ').find(c => c.startsWith(nome + '='));
+        return item ? decodeURIComponent(item.split('=')[1]) : null;
+    }
+
+    function atualizarRemover() {
+        const linhas = tabela.querySelectorAll('tr');
+        linhas.forEach(linha => linha.querySelector('.remover').disabled = linhas.length === 1);
+    }
+
+    function adicionarItem() {
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+            <td><select class="in produto">${opcoes}</select></td>
+            <td><input class="in codigo mono" placeholder="Ex.: CHD-80-300"></td>
+            <td><input class="in quantidade" type="number" min="1" value="1"></td>
+            <td><button type="button" class="remover" aria-label="Remover equipamento">✕</button></td>
+        `;
+        tabela.appendChild(linha);
+        atualizarRemover();
+        return linha;
+    }
+
+    function montarOrdem() {
+        return {
+            empresa: texto('empresa'),
+            comprador: texto('comprador'),
+            telefone: texto('telefone'),
+            email: texto('email'),
+            itens: [...tabela.querySelectorAll('tr')].map(linha => ({
+                produto: linha.querySelector('.produto').value,
+                codigo: linha.querySelector('.codigo').value.trim() || null,
+                quantidade: Number(linha.querySelector('.quantidade').value) || null
+            })),
+            problemaRelatado: texto('problemaRelatado'),
+            observacao: texto('observacao')
+        };
+    }
+
+    function mostrarErros(resposta) {
+        const mensagens = resposta.campos ? Object.values(resposta.campos) : [resposta.mensagem];
+        const caixa = campo('erros');
+        caixa.innerHTML = '<strong>Corrija antes de salvar:</strong>';
+        [...new Set(mensagens)].forEach(m => {
+            const linha = document.createElement('div');
+            linha.textContent = m;
+            caixa.appendChild(linha);
+        });
+        caixa.classList.remove('escondido');
+        campo('sucesso').classList.add('escondido');
+        window.scrollTo(0, 0);
+    }
+
+    function mostrarSucesso(id) {
+        const caixa = campo('sucesso');
+        caixa.innerHTML = `<span>Ordem <strong>#${id}</strong> salva.</span><a href="/manutencoes/${id}/pdf" target="_blank">Abrir PDF</a>`;
+        caixa.classList.remove('escondido');
+        campo('erros').classList.add('escondido');
+        window.scrollTo(0, 0);
+    }
+
+    function limparFormulario() {
+        ['empresa', 'comprador', 'telefone', 'email', 'problemaRelatado', 'observacao']
+            .forEach(id => campo(id).value = '');
+        tabela.innerHTML = '';
+        adicionarItem();
+        document.querySelectorAll('.contador').forEach(c => c.dispatchEvent(new Event('atualizar')));
+    }
+
+    async function salvar() {
+        const botao = campo('salvar');
+        botao.disabled = true;
+
+        try {
+            const resposta = await fetch('/manutencoes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': lerCookie('XSRF-TOKEN')
+                },
+                body: JSON.stringify(montarOrdem())
+            });
+
+            if (resposta.status === 403) {
+                mostrarErros({ mensagem: 'Sessão expirada. Faça login de novo.' });
+                return;
+            }
+
+            const corpo = await resposta.json();
+
+            if (resposta.ok) {
+                alterado = false;
+                limparFormulario();
+                mostrarSucesso(corpo.id);
+            } else {
+                mostrarErros(corpo);
+            }
+        } finally {
+            botao.disabled = false;
+        }
+    }
+
     document.querySelectorAll('.contador').forEach(contador => {
-        const campo = document.getElementById(contador.dataset.de);
-        const atualizar = () => contador.textContent = campo.value.length + ' / 1000';
-        campo.addEventListener('input', atualizar);
+        const caixa = campo(contador.dataset.de);
+        const atualizar = () => contador.textContent = caixa.value.length + ' / 1000';
+        caixa.addEventListener('input', atualizar);
+        contador.addEventListener('atualizar', atualizar);
         atualizar();
     });
+
+    tabela.addEventListener('click', evento => {
+        if (evento.target.classList.contains('remover')) {
+            evento.target.closest('tr').remove();
+            atualizarRemover();
+        }
+    });
+    campo('adicionar').addEventListener('click', () => adicionarItem().querySelector('.produto').focus());
+    campo('salvar').addEventListener('click', salvar);
+    campo('ficha').addEventListener('input', () => alterado = true);
+
+    window.addEventListener('beforeunload', evento => {
+        if (alterado) {
+            evento.preventDefault();
+            evento.returnValue = '';
+        }
+    });
+
+    adicionarItem();
 </script>
 
 </body>

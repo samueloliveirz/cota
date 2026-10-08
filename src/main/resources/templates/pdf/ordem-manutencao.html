@@ -14,6 +14,10 @@
     .direita { text-align: right; }
     .titulo { font-size: 15px; font-weight: bold; text-align: center; margin: 8px 0; }
     .dados td { padding: 3px 0; }
+    .itens { margin-top: 8px; }
+    .itens th, .itens td { border: 1px solid #999; padding: 4px; text-align: left; }
+    .itens th { background: #eee; }
+    .itens .direita { text-align: right; }
     .caixa { border: 1px solid #222; padding: 6px; margin-top: 8px; min-height: 60px; }
     .rotulo { font-weight: bold; margin-bottom: 4px; }
     .assinaturas { margin-top: 40px; }
@@ -50,13 +54,26 @@
   <!-- DADOS -->
   <table class="dados">
     <tr>
-      <td><b>Cliente:</b> <span th:text="${ordem.cliente}"></span></td>
+      <td><b>Empresa:</b> <span th:text="${ordem.empresa}"></span></td>
       <td><b>Telefone:</b> <span th:text="${ordem.telefone}"></span></td>
     </tr>
+    <tr th:if="${ordem.comprador != null or ordem.email != null}">
+      <td><span th:if="${ordem.comprador != null}"><b>Comprador:</b> <span th:text="${ordem.comprador}"></span></span></td>
+      <td><span th:if="${ordem.email != null}"><b>E-mail:</b> <span th:text="${ordem.email}"></span></span></td>
+    </tr>
+  </table>
+
+  <!-- EQUIPAMENTOS -->
+  <table class="itens">
     <tr>
-      <td><b>Produto:</b>
-        <span th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(ordem.produto.name()), '_', ' '))}"></span></td>
-      <td><b>Código:</b> <span th:text="${ordem.codigoProduto}"></span></td>
+      <th>Equipamento</th>
+      <th>Código</th>
+      <th class="direita" style="width: 50px;">Qtd</th>
+    </tr>
+    <tr th:each="item : ${ordem.itens}">
+      <td th:text="${item.produto.nome}">Cilindro</td>
+      <td th:text="${item.codigo}">Código</td>
+      <td class="direita" th:text="${item.quantidade}">1</td>
     </tr>
   </table>
 
