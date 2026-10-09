@@ -20,7 +20,8 @@ public record OrdemManutencaoRequest(
         @NotEmpty(message = "Adicione pelo menos um equipamento") @Valid List<ItemManutencaoRequest> itens,
         @NotBlank(message = "Informe o problema relatado")
         @Size(max = 1000, message = "O problema relatado pode ter no máximo 1000 caracteres") String problemaRelatado,
-        @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao
+        @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao,
+        @Size(max = 1000, message = "A informação interna pode ter no máximo 1000 caracteres") String observacaoInterna
 ) {
 
     public OrdemManutencao toEntity() {
@@ -32,6 +33,7 @@ public record OrdemManutencaoRequest(
         itens.forEach(item -> ordem.adicionarItem(item.toEntity()));
         ordem.setProblemaRelatado(problemaRelatado);
         ordem.setObservacao(observacao);
+        ordem.setObservacaoInterna(observacaoInterna);
         return ordem;
     }
 }

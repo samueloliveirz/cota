@@ -46,8 +46,10 @@ public class OrcamentoService {
         orcamento.setEnderecoEnvio(dados.getEnderecoEnvio());
         orcamento.setFormaPagamento(dados.getFormaPagamento());
         orcamento.setDiasFaturamento(dados.getDiasFaturamento());
+        orcamento.setFrete(dados.getFrete());
         orcamento.setDesconto(dados.getDesconto());
         orcamento.setObservacao(dados.getObservacao());
+        orcamento.setObservacaoInterna(dados.getObservacaoInterna());
         orcamento.setComprador(dados.getComprador());
         orcamento.setTelefone(dados.getTelefone());
         orcamento.setEmail(dados.getEmail());
@@ -61,13 +63,6 @@ public class OrcamentoService {
             throw new IllegalArgumentException("O desconto não pode ser maior que o valor dos produtos");
         }
         return orcamento;
-    }
-
-    public List<Orcamento> listarTodos() {
-        if (usuarioLogado.isAdmin()) {
-            return repository.findAll();
-        }
-        return repository.findBySetor(setorDoUsuario());
     }
 
     public Page<Orcamento> buscar(String empresa, StatusOrcamento status, Pageable pageable) {

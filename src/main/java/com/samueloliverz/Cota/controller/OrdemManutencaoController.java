@@ -2,6 +2,7 @@ package com.samueloliverz.Cota.controller;
 
 import com.samueloliverz.Cota.dto.OrdemManutencaoRequest;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
+import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.service.OrdemManutencaoService;
 import com.samueloliverz.Cota.service.PdfService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,6 +44,11 @@ public class OrdemManutencaoController {
     @GetMapping("/{id}")
     public OrdemManutencaoResponse buscarPorId(@PathVariable Long id) {
         return OrdemManutencaoResponse.from(service.buscarPorId(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    public OrdemManutencaoResponse mudarStatus(@PathVariable Long id, @RequestParam StatusOrcamento status) {
+        return OrdemManutencaoResponse.from(service.mudarStatus(id, status));
     }
 
     @GetMapping("/{id}/pdf")

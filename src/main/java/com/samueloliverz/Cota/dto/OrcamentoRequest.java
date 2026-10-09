@@ -31,6 +31,7 @@ public record OrcamentoRequest(
         @PositiveOrZero(message = "O frete não pode ser negativo") BigDecimal frete,
         @PositiveOrZero(message = "O desconto não pode ser negativo") BigDecimal desconto,
         @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao,
+        @Size(max = 1000, message = "A informação interna pode ter no máximo 1000 caracteres") String observacaoInterna,
         @NotEmpty(message = "Adicione pelo menos um item") @Valid List<ItemRequest> itens
 ) {
     public Orcamento toEntity() {
@@ -48,6 +49,7 @@ public record OrcamentoRequest(
         orcamento.setFrete(frete);
         orcamento.setDesconto(desconto);
         orcamento.setObservacao(observacao);
+        orcamento.setObservacaoInterna(observacaoInterna);
         itens.forEach(item -> orcamento.adicionarItem(item.toEntity()));
         return orcamento;
     }

@@ -57,6 +57,7 @@
     .resumo-linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
     .resumo-linha span:first-child { color: #5B6474; }
     .resumo .btn { justify-content: center; }
+    .interna .in { background: #FFFBEB; border-color: #F6D9AE; }
 
     .desconto { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid #EEF0F3; border-bottom: 1px solid #EEF0F3; }
     .desconto .lbl { font-size: 13px; color: #5B6474; }
@@ -211,6 +212,10 @@
               <textarea class="in" id="observacao" rows="2" placeholder="Aparece no PDF"></textarea>
             </label>
           </div>
+          <label class="campo interna" style="margin-top: 16px">
+            <span class="lbl">Informação interna <span class="dica">(só aparece aqui no sistema, não sai no PDF)</span></span>
+            <textarea class="in" id="observacaoInterna" rows="2" maxlength="1000" placeholder="Ex.: margem apertada, cliente pediu prazo, falar com o Fulano antes de fechar"></textarea>
+          </label>
         </section>
       </div>
 
@@ -253,7 +258,7 @@
   const tabela = document.getElementById('itens');
   const escolhas = { tipo: 'FORMALIZADO', tipoRetirada: 'LOJA', formaPagamento: 'A_VISTA' };
   const ROTULOS = { FORMALIZADO: 'Formalizado', NORMAL: 'Normal', PRESENCIAL: 'Presencial', VALE: 'Vale' };
-  const CAMPOS_TEXTO = ['empresa', 'cnpj', 'comprador', 'telefone', 'email', 'enderecoEnvio', 'diasFaturamento', 'frete', 'observacao'];
+  const CAMPOS_TEXTO = ['empresa', 'cnpj', 'comprador', 'telefone', 'email', 'enderecoEnvio', 'diasFaturamento', 'frete', 'observacao', 'observacaoInterna'];
 
   let modoDesconto = 'valor';
   let descontoAtual = 0;
@@ -437,6 +442,7 @@
       frete: numero('frete'),
       desconto: descontoAtual > 0 ? descontoAtual : null,
       observacao: texto('observacao'),
+      observacaoInterna: texto('observacaoInterna'),
       itens: itens
     };
   }

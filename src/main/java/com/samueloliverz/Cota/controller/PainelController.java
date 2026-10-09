@@ -84,15 +84,33 @@ public class PainelController {
 
     @GetMapping("/manutencoes")
     public String listarManutencoes(@RequestParam(required = false) String empresa,
+                                    @RequestParam(required = false) StatusOrcamento status,
                                     @RequestParam(defaultValue = "0") int pagina,
                                     Model model) {
         Pageable pageable = PageRequest.of(pagina, ITENS_POR_PAGINA, Sort.by(Sort.Direction.DESC, "id"));
-        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(empresa, pageable)
+        Page<OrdemManutencaoResponse> ordens = manutencaoService.buscar(empresa, status, pageable)
                 .map(OrdemManutencaoResponse::from);
 
         model.addAttribute("ordens", ordens);
+        model.addAttribute("contagem", manutencaoService.contarPorStatus());
+        model.addAttribute("statusList", StatusOrcamento.values());
         model.addAttribute("empresa", empresa);
+        model.addAttribute("statusAtual", status);
         return "telas/manutencoes";
+    }
+
+    @GetMapping("/manutencoes/{id}/editar")
+    public String editarManutencao(@PathVariable Long id, Model model) {
+        manutencaoService.buscarPorId(id);
+        model.addAttribute("ordemId", id);
+        model.addAttribute("produtos", ProdutoManutencao.values());
+        return "telas/manutencao-form";
+    }
+
+    @PostMapping("/manutencoes/{id}/status")
+    public String mudarStatusManutencao(@PathVariable Long id, @RequestParam StatusOrcamento status) {
+        manutencaoService.mudarStatus(id, status);
+        return "redirect:/painel/manutencoes";
     }
 
     @GetMapping("/manutencoes/nova")
@@ -100,7 +118,6 @@ public class PainelController {
         model.addAttribute("produtos", ProdutoManutencao.values());
         return "telas/manutencao-form";
     }
-
     @GetMapping("/usuarios")
     public String listarUsuarios(Model model) {
         List<UsuarioResponse> usuarios = usuarioService.listarTodos().stream()

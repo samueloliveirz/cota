@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cota | Nova manutenção</title>
+    <title th:text="${ordemId == null} ? 'Cota | Nova manutenção' : 'Cota | Editar manutenção'">Cota | Nova manutenção</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cota.css}">
     <style>
@@ -35,6 +35,7 @@
 
         .alerta-ok { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
         .alerta-ok a { color: #067647; font-weight: 600; }
+        .interna .in { background: #FFFBEB; border-color: #F6D9AE; }
         .acoes-form { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
     </style>
 </head>
@@ -43,13 +44,14 @@
 <div class="app">
     <aside th:replace="~{fragments/sidebar :: sidebar('nova-manutencao')}"></aside>
 
-    <main class="conteudo">
+    <main class="conteudo" id="pagina" th:attr="data-id=${ordemId}">
         <div>
             <div class="migalha">
-                <a th:href="@{/painel/manutencoes}">Ordens de manutenção</a> / Nova
+                <a th:href="@{/painel/manutencoes}">Ordens de manutenção</a>
+                <span th:text="${ordemId == null} ? ' / Nova' : ' / Editar #' + ${ordemId}"> / Nova</span>
             </div>
-            <h1 style="margin-top: 8px;">Nova ordem de manutenção</h1>
-            <p class="subtitulo">Depois de salvar, é só abrir o PDF com as 2 vias.</p>
+            <h1 style="margin-top: 8px;" th:text="${ordemId == null} ? 'Nova ordem de manutenção' : 'Editar ordem #' + ${ordemId}">Nova ordem de manutenção</h1>
+            <p class="subtitulo" th:text="${ordemId == null} ? 'Depois de salvar, é só abrir o PDF com as 2 vias.' : 'Os equipamentos salvos substituem os anteriores.'">Depois de salvar, é só abrir o PDF com as 2 vias.</p>
         </div>
 
         <div id="sucesso" class="alerta-ok formulario escondido"></div>
@@ -121,6 +123,15 @@
                     <textarea class="in" id="observacao" rows="3" maxlength="1000"
                               placeholder="Estado dos equipamentos, acessórios que vieram junto"></textarea>
                 </div>
+
+                <div class="campo bloco interna">
+                    <div class="lbl-linha">
+                        <label class="lbl" for="observacaoInterna">Informação interna <span class="opcional">(só aparece aqui no sistema, não sai no PDF)</span></label>
+                        <span class="contador" data-de="observacaoInterna">0 / 1000</span>
+                    </div>
+                    <textarea class="in" id="observacaoInterna" rows="3" maxlength="1000"
+                              placeholder="O que foi feito, peças trocadas, quem fez o serviço"></textarea>
+                </div>
             </section>
 
             <div class="acoes-form">
@@ -132,7 +143,9 @@
 </div>
 
 <script>
+    let ordemId = document.getElementById('pagina').dataset.id || null;
     const tabela = document.getElementById('itens');
+    const CAMPOS = ['empresa', 'comprador', 'telefone', 'email', 'problemaRelatado', 'observacao', 'observacaoInterna'];
     const opcoes = document.getElementById('opcoesProduto').innerHTML;
     let alterado = false;
 
@@ -155,7 +168,7 @@
         linhas.forEach(linha => linha.querySelector('.remover').disabled = linhas.length === 1);
     }
 
-    function adicionarItem() {
+    function adicionarItem(item = {}) {
         const linha = document.createElement('tr');
         linha.innerHTML = `
             <td><select class="in produto">${opcoes}</select></td>
@@ -163,6 +176,9 @@
             <td><input class="in quantidade" type="number" min="1" value="1"></td>
             <td><button type="button" class="remover" aria-label="Remover equipamento">✕</button></td>
         `;
+        if (item.produto) linha.querySelector('.produto').value = item.produto;
+        linha.querySelector('.codigo').value = item.codigo ?? '';
+        linha.querySelector('.quantidade').value = item.quantidade ?? 1;
         tabela.appendChild(linha);
         atualizarRemover();
         return linha;
@@ -180,7 +196,8 @@
                 quantidade: Number(linha.querySelector('.quantidade').value) || null
             })),
             problemaRelatado: texto('problemaRelatado'),
-            observacao: texto('observacao')
+            observacao: texto('observacao'),
+            observacaoInterna: texto('observacaoInterna')
         };
     }
 
@@ -206,12 +223,30 @@
         window.scrollTo(0, 0);
     }
 
+    function atualizarContadores() {
+        document.querySelectorAll('.contador').forEach(c => c.dispatchEvent(new Event('atualizar')));
+    }
+
     function limparFormulario() {
-        ['empresa', 'comprador', 'telefone', 'email', 'problemaRelatado', 'observacao']
-            .forEach(id => campo(id).value = '');
+        CAMPOS.forEach(id => campo(id).value = '');
         tabela.innerHTML = '';
         adicionarItem();
-        document.querySelectorAll('.contador').forEach(c => c.dispatchEvent(new Event('atualizar')));
+        atualizarContadores();
+    }
+
+    async function carregar() {
+        const resposta = await fetch(`/manutencoes/${ordemId}`);
+        if (!resposta.ok) {
+            mostrarErros({ mensagem: 'Ordem de manutenção não encontrada.' });
+            return;
+        }
+
+        const ordem = await resposta.json();
+        CAMPOS.forEach(id => campo(id).value = ordem[id] ?? '');
+        tabela.innerHTML = '';
+        ordem.itens.forEach(item => adicionarItem(item));
+        if (tabela.children.length === 0) adicionarItem();
+        atualizarContadores();
     }
 
     async function salvar() {
@@ -219,8 +254,8 @@
         botao.disabled = true;
 
         try {
-            const resposta = await fetch('/manutencoes', {
-                method: 'POST',
+            const resposta = await fetch(ordemId ? `/manutencoes/${ordemId}` : '/manutencoes', {
+                method: ordemId ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-XSRF-TOKEN': lerCookie('XSRF-TOKEN')
@@ -237,7 +272,7 @@
 
             if (resposta.ok) {
                 alterado = false;
-                limparFormulario();
+                if (!ordemId) limparFormulario();
                 mostrarSucesso(corpo.id);
             } else {
                 mostrarErros(corpo);
@@ -272,7 +307,11 @@
         }
     });
 
-    adicionarItem();
+    if (ordemId) {
+        carregar();
+    } else {
+        adicionarItem();
+    }
 </script>
 
 </body>

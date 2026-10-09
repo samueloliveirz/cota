@@ -1,6 +1,7 @@
 package com.samueloliverz.Cota.dto;
 
 import com.samueloliverz.Cota.enums.Setor;
+import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.model.OrdemManutencao;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,9 @@ public record OrdemManutencaoResponse(
         List<ItemManutencaoResponse> itens,
         String problemaRelatado,
         String observacao,
+        String observacaoInterna,
         Setor setor,
+        StatusOrcamento status,
         LocalDateTime dataCriacao
 ) {
 
@@ -29,7 +32,9 @@ public record OrdemManutencaoResponse(
                 ordem.getItens().stream().map(ItemManutencaoResponse::from).toList(),
                 ordem.getProblemaRelatado(),
                 ordem.getObservacao(),
+                ordem.getObservacaoInterna(),
                 ordem.getSetor(),
+                ordem.getStatus(),
                 ordem.getDataCriacao()
         );
     }

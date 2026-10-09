@@ -65,6 +65,9 @@ public class  Orcamento {
     @Column(length = 1000)
     private String observacao;
 
+    @Column(length = 1000)
+    private String observacaoInterna;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusOrcamento status;

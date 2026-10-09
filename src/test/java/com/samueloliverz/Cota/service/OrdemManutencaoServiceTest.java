@@ -3,6 +3,7 @@ package com.samueloliverz.Cota.service;
 import com.samueloliverz.Cota.enums.ProdutoManutencao;
 import com.samueloliverz.Cota.enums.Role;
 import com.samueloliverz.Cota.enums.Setor;
+import com.samueloliverz.Cota.enums.StatusOrcamento;
 import com.samueloliverz.Cota.exception.RecursoNaoEncontradoException;
 import com.samueloliverz.Cota.model.ItemManutencao;
 import com.samueloliverz.Cota.model.OrdemManutencao;
@@ -82,7 +83,7 @@ class OrdemManutencaoServiceTest {
         when(repository.findByEmpresaContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable))
                 .thenReturn(Page.empty());
 
-        service.buscar("prensas", pageable);
+        service.buscar("prensas", null, pageable);
 
         verify(repository).findByEmpresaContainingIgnoreCaseAndSetor("prensas", Setor.HIDRAULICA, pageable);
         verify(repository, never()).findByEmpresaContainingIgnoreCase(any(), any());
@@ -93,10 +94,33 @@ class OrdemManutencaoServiceTest {
         when(usuarioLogado.isAdmin()).thenReturn(true);
         when(repository.findByEmpresaContainingIgnoreCase("", pageable)).thenReturn(Page.empty());
 
-        service.buscar(null, pageable);
+        service.buscar(null, null, pageable);
 
         verify(repository).findByEmpresaContainingIgnoreCase("", pageable);
         verify(repository, never()).findByEmpresaContainingIgnoreCaseAndSetor(any(), any(), any());
+    }
+
+    @Test
+    void deveFiltrarPorStatusNoProprioSetor() {
+        when(usuarioLogado.isAdmin()).thenReturn(false);
+        when(usuarioLogado.get()).thenReturn(usuario(Setor.HIDRAULICA, Role.USER));
+        when(repository.findByEmpresaContainingIgnoreCaseAndStatusAndSetor("", StatusOrcamento.FECHADO, Setor.HIDRAULICA, pageable))
+                .thenReturn(Page.empty());
+
+        service.buscar(null, StatusOrcamento.FECHADO, pageable);
+
+        verify(repository).findByEmpresaContainingIgnoreCaseAndStatusAndSetor("", StatusOrcamento.FECHADO, Setor.HIDRAULICA, pageable);
+    }
+
+    @Test
+    void mudarStatusDeveAlterarAOrdem() {
+        OrdemManutencao existente = ordem(Setor.HIDRAULICA);
+        when(repository.findById(1L)).thenReturn(Optional.of(existente));
+        when(usuarioLogado.isAdmin()).thenReturn(true);
+
+        OrdemManutencao atualizada = service.mudarStatus(1L, StatusOrcamento.AGUARDADO);
+
+        assertThat(atualizada.getStatus()).isEqualTo(StatusOrcamento.AGUARDADO);
     }
 
     @Test
