@@ -1,0 +1,1 @@
+ALTER TABLE orcamento ALTER COLUMN dias_faturamento TYPE VARCHAR(30) USING dias_faturamento::VARCHAR;

@@ -24,7 +24,7 @@ public record OrcamentoResponse(
         TipoRetirada tipoRetirada,
         String enderecoEnvio,
         FormaPagamento formaPagamento,
-        Integer diasFaturamento,
+        String diasFaturamento,
         String observacao,
         String observacaoInterna,
         StatusOrcamento status,
@@ -61,5 +61,12 @@ public record OrcamentoResponse(
                 orcamento.getFrete(),
                 orcamento.calcularTotal()
         );
+    }
+
+    public String cnpjFormatado() {
+        if (cnpj == null || cnpj.length() != 14) {
+            return cnpj;
+        }
+        return cnpj.replaceAll("(\\d{2})(\\d{3})(\\d{3})(\\d{4})(\\d{2})", "$1.$2.$3/$4-$5");
     }
 }

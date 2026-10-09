@@ -5,12 +5,7 @@ import com.samueloliverz.Cota.enums.TipoOrcamento;
 import com.samueloliverz.Cota.enums.TipoRetirada;
 import com.samueloliverz.Cota.model.Orcamento;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,7 +22,8 @@ public record OrcamentoRequest(
         @NotNull(message = "Informe o tipo de retirada") TipoRetirada tipoRetirada,
         @Size(max = 255, message = "O endereço pode ter no máximo 255 caracteres") String enderecoEnvio,
         @NotNull(message = "Informe a forma de pagamento") FormaPagamento formaPagamento,
-        Integer diasFaturamento,
+        @Size(max = 30, message = "Os dias de faturamento podem ter no máximo 30 caracteres")
+        @Pattern(regexp = "\\d{1,3}(/\\d{1,3})*", message = "Use os dias separados por barra, ex.: 28 ou 30/45/60") String diasFaturamento,
         @PositiveOrZero(message = "O frete não pode ser negativo") BigDecimal frete,
         @PositiveOrZero(message = "O desconto não pode ser negativo") BigDecimal desconto,
         @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao,

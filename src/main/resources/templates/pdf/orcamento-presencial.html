@@ -56,7 +56,7 @@
     <table class="dados">
         <tr>
             <td><b>Cliente:</b> <span th:text="${orcamento.empresa}"></span></td>
-            <td th:if="${orcamento.cnpj != null}"><b>CNPJ:</b> <span th:text="${orcamento.cnpj}"></span></td>
+            <td th:if="${orcamento.cnpj != null}"><b>CNPJ:</b> <span th:text="${orcamento.cnpjFormatado()}"></span></td>
         </tr>
         <tr th:if="${orcamento.comprador != null or orcamento.telefone != null or orcamento.email != null}">
             <td><span th:if="${orcamento.comprador != null}"><b>Comprador:</b> <span th:text="${orcamento.comprador}"></span></span></td>

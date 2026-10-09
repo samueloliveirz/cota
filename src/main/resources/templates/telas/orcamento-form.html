@@ -122,8 +122,7 @@
         <section class="card">
           <h2>Cliente</h2>
           <div class="grade">
-            <label class="campo">
-              <span class="lbl">Empresa</span>
+            <label class="campo">              <span class="lbl">Empresa <span class="dica" id="dicaEmpresa"></span></span>
               <input class="in" id="empresa" placeholder="Razão social ou nome">
             </label>
             <label class="campo">
@@ -198,7 +197,7 @@
               </div>
               <label class="campo escondido" id="campoDias" style="margin-top: 10px">
                 <span class="lbl">Dias de faturamento</span>
-                <input class="in" id="diasFaturamento" type="number" min="1" placeholder="Ex.: 28">
+                <input class="in" id="diasFaturamento" placeholder="Ex.: 28 ou 30/45/60">
               </label>
             </div>
           </div>
@@ -357,7 +356,7 @@
     subtotal = centavos(subtotal);
     descontoAtual = calcularDesconto(subtotal);
     const frete = numero('frete') || 0;
-    const dias = numero('diasFaturamento');
+    const dias = texto('diasFaturamento');
 
     campo('subtotal').textContent = reais(subtotal);
     campo('valorDesconto').textContent = '− ' + reais(descontoAtual);
@@ -370,6 +369,37 @@
             ? (dias ? `Faturado ${dias} dias` : 'Faturado')
             : 'À vista';
   }
+
+
+  async function buscarNomePeloCnpj() {
+    const cnpj = campo('cnpj').value.replace(/\D/g, '');
+    const dica = campo('dicaEmpresa');
+
+    if (cnpj.length !== 14 || texto('empresa')) return;
+
+    dica.textContent = '(buscando na Receita...)';
+    try {
+      const resposta = await fetch(`/cnpj/${cnpj}`);
+      if (!resposta.ok) {
+        dica.textContent = '(CNPJ não encontrado na Receita)';
+        return;
+      }
+
+      const dados = await resposta.json();
+      if (dados.razaoSocial && !texto('empresa')) {
+        campo('empresa').value = dados.razaoSocial;
+        dica.textContent = '(preenchido pela Receita)';
+        registrarAlteracao();
+      } else {
+        dica.textContent = '';
+      }
+    } catch (e) {
+      dica.textContent = '';
+    }
+  }
+
+
+
 
   async function consultarCliente() {
     const cnpj = campo('cnpj').value.replace(/\D/g, '');
@@ -438,7 +468,7 @@
       tipoRetirada: escolhas.tipoRetirada,
       enderecoEnvio: escolhas.tipoRetirada === 'SEDEX' ? texto('enderecoEnvio') : null,
       formaPagamento: escolhas.formaPagamento,
-      diasFaturamento: escolhas.formaPagamento === 'FATURADO' ? numero('diasFaturamento') : null,
+      diasFaturamento: escolhas.formaPagamento === 'FATURADO' ? texto('diasFaturamento') : null,
       frete: numero('frete'),
       desconto: descontoAtual > 0 ? descontoAtual : null,
       observacao: texto('observacao'),
@@ -628,7 +658,11 @@
     modoDesconto = 'valor';
     recalcular();
   });
-  campo('cnpj').addEventListener('change', consultarCliente);
+  campo('cnpj').addEventListener('change', () => {
+    consultarCliente();
+    buscarNomePeloCnpj();
+  });
+  campo('empresa').addEventListener('input', () => campo('dicaEmpresa').textContent = '');
   campo('btnHistorico').addEventListener('click', () => campo('historico').classList.toggle('escondido'));
   campo('salvar').addEventListener('click', salvar);
 

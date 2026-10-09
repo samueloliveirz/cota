@@ -57,7 +57,8 @@ public class  Orcamento {
     @Column(nullable = false)
     private FormaPagamento formaPagamento;
 
-    private Integer diasFaturamento;
+    @Column(length = 30)
+    private String diasFaturamento;
 
     @Column(precision = 12, scale = 2)
     private BigDecimal frete;

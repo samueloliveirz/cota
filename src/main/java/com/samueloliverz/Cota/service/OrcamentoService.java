@@ -149,8 +149,9 @@ public class OrcamentoService {
             throw new IllegalArgumentException("Sedex precisa de endereço de envio");
         }
         if (orcamento.getFormaPagamento() == FormaPagamento.FATURADO
-                && (orcamento.getDiasFaturamento() == null || orcamento.getDiasFaturamento() <= 0)) {
+                && (orcamento.getDiasFaturamento() == null || orcamento.getDiasFaturamento().isBlank())) {
             throw new IllegalArgumentException("Faturado precisa dos dias de faturamento");
+
         }
         if (orcamento.getDesconto() != null
                 && orcamento.getDesconto().compareTo(orcamento.calcularSubtotal()) > 0) {
