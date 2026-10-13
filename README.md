@@ -179,12 +179,17 @@ Resposta (resumida):
 
 ## Próximos passos
 
-- [x] Geração do orçamento em PDF
-- [x] Autenticação com Spring Security
-- [ ] Testes unitários e de integração
-- [x] Migrations com Flyway
-- [x] Documentação com Swagger / OpenAPI
-- [ ] Front-end
+- ✅ Geração de PDF
+- ✅ Autenticação e perfis com Spring Security
+- ✅ Separação por setor
+- ✅ Migrations com Flyway
+- ✅ Documentação com Swagger
+- ✅ Telas web
+- ✅ Testes unitários e de integração
+- ✅ Deploy
+- ⬜ Excluir orçamento (restrito ao ADMIN)
+- ⬜ Testes com Testcontainers
+- ⬜ Controle de estoque integrado aos orçamentos
 
 ## Autor
 
