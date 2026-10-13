@@ -25,6 +25,28 @@ O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de 
 - Cada vendedor vê só os orçamentos do seu setor (hidráulica ou pneumática); o ADMIN vê todos
 - Cadastro de usuários restrito ao ADMIN
 
+## Telas
+
+### Login
+
+![Login](docs/telas/login.png)
+
+### Lista de orçamentos
+
+![Lista de orçamentos](docs/telas/lista.png)
+
+### Novo orçamento
+
+![Novo orçamento](docs/telas/orcamento.png)
+
+### Lista de manutenções
+
+![Lista de manutenções](docs/telas/manutencoes.png)
+
+### Nova manutenção
+
+![Nova manutenção](docs/telas/manutencao.png)
+
 ## Tecnologias
 
 - Java 21
