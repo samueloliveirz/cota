@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<body>
+
+<!-- Estilo ERP: grade de caixas com borda preta, pensado pra imprimir e xerocar.
+     A cor da loja (loja.cor no application.yaml) só aparece no cabeçalho.
+     Cada bloco tem a própria borda; o título do bloco não tem borda embaixo pra não dobrar a linha. -->
+<style th:fragment="estilo" th:inline="css" th:with="cor=${loja.cor ?: '#0E1726'}">
+    @page { size: A4; margin: 10mm 12mm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.3; color: #000; margin: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { vertical-align: top; }
+    .direita { text-align: right; }
+    .centro { text-align: center; }
+    .suave { color: #444; }
+
+    .via { page-break-inside: avoid; }
+    .via + .via { border-top: 1px dashed #000; margin-top: 3mm; padding-top: 2mm; }
+    .nome-via { text-align: right; font-size: 6.5px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+    .quebra { white-space: pre-line; }
+
+    .rotulo { font-size: 6.3px; color: #333; text-transform: uppercase; margin-bottom: 2px; }
+    .valor { font-size: 9px; }
+    .forte { font-weight: bold; }
+
+    /* Cabeçalho */
+    .cabecalho { border: 1px solid #222; border-top: 3px solid [(${cor})]; }
+    .cabecalho td { padding: 6px 8px; vertical-align: middle; }
+    .cabecalho .doc { background: [(${cor})]; color: #fff; text-align: center; }
+    .logo { height: 38px; }
+    .loja-razao { font-weight: bold; font-size: 10px; color: [(${cor})]; margin-bottom: 2px; }
+    .loja-info { font-size: 7.8px; line-height: 1.45; }
+    .doc-titulo { font-size: 8px; font-weight: bold; text-transform: uppercase; }
+    .doc-numero { font-size: 16px; font-weight: bold; margin-top: 3px; }
+
+    /* Blocos */
+    .resumo, .bloco, .fim { margin-top: 7px; }
+    .fim .bloco { margin-top: 0; }
+    .resumo td { border: 1px solid #222; padding: 4px 6px; }
+    .bloco-titulo { border: 1px solid #222; border-bottom: none; background: #e4e4e4;
+                    padding: 3px 6px; font-size: 6.8px; font-weight: bold; text-transform: uppercase; }
+    .bloco-corpo { border: 1px solid #222; padding: 5px 6px; }
+    .campos td { border: 1px solid #222; padding: 4px 6px; }
+    .problema { min-height: 44px; }
+    .pix-chave { font-size: 10px; font-weight: bold; }
+
+    /* Itens: grade vertical forte, linhas horizontais leves */
+    table.itens { border: 1px solid #222; }
+    .itens th { border: 1px solid #222; background: #e4e4e4; padding: 3px 6px;
+                font-size: 6.5px; font-weight: bold; text-transform: uppercase; text-align: left; }
+    .itens td { border-left: 1px solid #222; border-right: 1px solid #222; border-bottom: 0.5px solid #aaa; padding: 4px 6px; }
+    .itens th.direita, .itens td.direita { text-align: right; }
+    .itens .num { width: 22px; text-align: center; }
+
+    /* Totais */
+    .fim > tbody > tr > td, .fim > tr > td { padding: 0; }
+    table.totais { border: 1px solid #222; }
+    .totais td { border-left: 1px solid #222; border-right: 1px solid #222; padding: 4px 6px; }
+    .totais tr.total td { border-top: 1.5px solid #222; background: #e4e4e4; font-weight: bold; font-size: 11px; padding: 5px 6px; }
+
+    /* Rodapé */
+    .rodape { margin-top: 34px; }
+    .assinaturas td { width: 50%; padding: 0 20px; text-align: center; }
+    .linha { border-top: 1px solid #000; padding-top: 2px; font-size: 7px; }
+    .contato { margin-top: 8px; border-top: 1px solid #222; padding-top: 3px; font-size: 6.8px; color: #333; }
+
+    /* Vias: duas por folha */
+    .via .logo { height: 32px; }
+    .via .doc-numero { font-size: 14px; }
+    .via .rodape { margin-top: 26px; }
+    .via .contato { display: none; }
+    .via .problema { min-height: 26px; }
+</style>
+
+<!-- CABEÇALHO: dados da loja à esquerda, tipo e número do documento à direita -->
+<table th:fragment="cabecalho(titulo, numero)" class="cabecalho">
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td th:if="${logo != null}" style="width: 1%; padding: 0 12px 0 0;">
+                        <img th:src="${logo}" class="logo" alt="Logo"/>
+                    </td>
+                    <td style="padding: 0;">
+                        <div class="loja-razao" th:text="${loja.nome}">Razão social</div>
+                        <div class="loja-info">
+                            <div th:text="${loja.endereco}">Endereço</div>
+                            <div th:text="'CNPJ: ' + ${loja.cnpj} + '  |  Fone: ' + ${loja.telefone}">CNPJ · Telefone</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td class="doc" style="width: 130px;">
+            <div class="doc-titulo" th:text="${titulo}">Orçamento</div>
+            <div class="doc-numero" th:text="'Nº ' + ${#numbers.formatInteger(numero, 6)}">Nº 000001</div>
+        </td>
+    </tr>
+</table>
+
+<!-- RESUMO: datas e condições em uma linha de caixas -->
+<table th:fragment="resumo(o)" class="resumo">
+    <tr>
+        <td style="width: 15%;">
+            <div class="rotulo">Data de emissão</div>
+            <div class="valor" th:text="${#temporals.format(o.dataCriacao, 'dd/MM/yyyy')}">01/01/2026</div>
+        </td>
+        <td style="width: 15%;">
+            <div class="rotulo">Validade</div>
+            <div class="valor" th:text="${o.dataValidade != null} ? ${#temporals.format(o.dataValidade, 'dd/MM/yyyy')} : '—'">21/01/2026</div>
+        </td>
+        <td style="width: 35%;">
+            <div class="rotulo">Condição de pagamento</div>
+            <div class="valor" th:text="${o.formaPagamento.name() == 'FATURADO'} ? 'Faturado ' + ${o.diasFaturamento} + ' dias' : 'À vista'">À vista</div>
+        </td>
+        <td>
+            <div class="rotulo">Entrega</div>
+            <div class="valor" th:text="${o.tipoRetirada.name() == 'SEDEX'} ? 'Envio por Sedex' : 'Retirada na loja'">Retirada na loja</div>
+        </td>
+    </tr>
+</table>
+
+<!-- CLIENTE: caixas com os dados preenchidos; linhas vazias não aparecem -->
+<div th:fragment="cliente(o, rotuloEmpresa)" class="bloco">
+    <div class="bloco-titulo">Destinatário</div>
+    <table class="campos">
+        <tr>
+            <td th:colspan="${o.cnpj == null} ? 2 : 1" style="width: 65%;">
+                <div class="rotulo" th:text="${rotuloEmpresa}">Empresa</div>
+                <div class="valor forte" th:text="${o.empresa}">Empresa</div>
+            </td>
+            <td th:if="${o.cnpj != null}">
+                <div class="rotulo">CNPJ</div>
+                <div class="valor" th:text="${o.cnpjFormatado()}">CNPJ</div>
+            </td>
+        </tr>
+        <tr th:if="${o.comprador != null or o.telefone != null or o.email != null}">
+            <td>
+                <div class="rotulo">Comprador</div>
+                <div class="valor" th:text="${o.comprador ?: '—'}">Comprador</div>
+            </td>
+            <td>
+                <div class="rotulo">Telefone / E-mail</div>
+                <div class="valor">
+                    <span th:text="${o.telefone ?: ''}">Telefone</span>
+                    <span th:if="${o.telefone != null and o.email != null}"> / </span>
+                    <span th:text="${o.email ?: ''}">E-mail</span>
+                </div>
+            </td>
+        </tr>
+        <tr th:if="${o.enderecoEnvio != null}">
+            <td colspan="2">
+                <div class="rotulo">Endereço de entrega</div>
+                <div class="valor" th:text="${o.enderecoEnvio}">Endereço</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- ITENS -->
+<div th:fragment="itens(o)" class="bloco">
+    <div class="bloco-titulo">Produtos</div>
+    <table class="itens">
+        <tr>
+            <th class="num">Item</th>
+            <th style="width: 75px;">Código</th>
+            <th>Descrição do produto</th>
+            <th class="direita" style="width: 34px;">Qtd</th>
+            <th class="direita" style="width: 68px;">Vlr. unitário</th>
+            <th class="direita" style="width: 68px;">Vlr. total</th>
+        </tr>
+        <tr th:each="item, i : ${o.itens}">
+            <td class="num" th:text="${i.count}">1</td>
+            <td th:text="${item.codigo ?: '—'}">Código</td>
+            <td th:text="${item.produto}">Produto</td>
+            <td class="direita" th:text="${item.quantidade}">1</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+    </table>
+</div>
+
+<!-- TOTAIS: desconto e frete só aparecem quando existem -->
+<div th:fragment="totais(o)">
+    <div class="bloco-titulo">Cálculo do total</div>
+    <table class="totais">
+        <tr>
+            <td>Total dos produtos</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(o.subtotal, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr th:if="${o.desconto != null and o.desconto.signum() > 0}">
+            <td>(-) Desconto</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(o.desconto, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr th:if="${o.frete != null and o.frete.signum() > 0}">
+            <td>(+) Frete</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(o.frete, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr class="total">
+            <td>VALOR TOTAL (R$)</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(o.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+    </table>
+</div>
+
+<!-- OBSERVAÇÕES: a regra do frete sempre aparece, a observação digitada só se existir -->
+<div th:fragment="observacoes(o)">
+    <div class="bloco-titulo">Informações complementares</div>
+    <div class="bloco-corpo">
+        <div th:if="${o.tipoRetirada.name() != 'SEDEX'}">Material para retirada na loja.</div>
+        <div th:if="${o.tipoRetirada.name() == 'SEDEX' and o.frete != null and o.frete.signum() > 0}">Frete incluso no valor total.</div>
+        <div th:if="${o.tipoRetirada.name() == 'SEDEX' and (o.frete == null or o.frete.signum() == 0)}">Frete por conta do cliente (FOB).</div>
+        <div>Preços e disponibilidade válidos até a data de validade.</div>
+        <div th:if="${o.observacao != null}" class="quebra" th:text="${o.observacao}" style="margin-top: 4px;">Observação</div>
+    </div>
+</div>
+
+<!-- RODAPÉ: assinaturas + linha de emissão -->
+<div th:fragment="rodape(esquerda, direita)" class="rodape">
+    <table class="assinaturas">
+        <tr>
+            <td><div class="linha" th:text="${esquerda}">Loja</div></td>
+            <td><div class="linha" th:text="${direita}">Cliente</div></td>
+        </tr>
+    </table>
+    <table class="contato">
+        <tr>
+            <td th:text="${loja.nome} + ' - ' + ${loja.telefone}">Contato da loja</td>
+            <td class="direita" th:text="'Emitido em ' + ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">Emitido em</td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

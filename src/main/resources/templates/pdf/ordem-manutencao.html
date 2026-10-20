@@ -1,104 +1,93 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <style>
-    @page { size: A4; margin: 15mm 15mm; }
-    body { font-family: sans-serif; font-size: 10px; color: #222; }
-    table { width: 100%; border-collapse: collapse; }
-    .via { page-break-inside: avoid; }
-    .via + .via { border-top: 1px dashed #999; margin-top: 14px; padding-top: 14px; }
-    .nome-via { text-align: right; font-size: 9px; color: #777; }
-    .cabecalho { border-bottom: 2px solid #222; padding-bottom: 6px; margin-bottom: 8px; }
-    .loja { font-size: 12px; font-weight: bold; }
-    .direita { text-align: right; }
-    .titulo { font-size: 15px; font-weight: bold; text-align: center; margin: 8px 0; }
-    .dados td { padding: 3px 0; }
-    .itens { margin-top: 8px; }
-    .itens th, .itens td { border: 1px solid #999; padding: 4px; text-align: left; }
-    .itens th { background: #eee; }
-    .itens .direita { text-align: right; }
-    .caixa { border: 1px solid #222; padding: 6px; margin-top: 8px; min-height: 60px; }
-    .rotulo { font-weight: bold; margin-bottom: 4px; }
-    .assinaturas { margin-top: 40px; }
-    .assinaturas td { width: 50%; text-align: center; padding: 0 20px; }
-    .linha { border-top: 1px solid #222; padding-top: 4px; }
-  </style>
+    <meta charset="UTF-8"/>
+    <style th:replace="~{pdf/base :: estilo}"></style>
 </head>
 <body>
 
-<!-- Repete tudo isso 2 vezes: uma pra cada via -->
 <div class="via" th:each="via : ${ {'Via do cliente', 'Via da loja'} }">
+    <div class="nome-via" th:text="${via}">Via do cliente</div>
 
-  <div class="nome-via" th:text="${via}">Via do cliente</div>
+    <table th:replace="~{pdf/base :: cabecalho('Ordem de manutenção', ${ordem.id})}"></table>
 
-  <!-- CABEÇALHO -->
-  <div class="cabecalho">
-    <table>
-      <tr>
-        <td>
-          <div class="loja" th:text="${loja.nome}">NOME DA LOJA</div>
-          <div th:text="${loja.endereco}">Endereço</div>
-          <div th:text="'CNPJ: ' + ${loja.cnpj} + ' | Tel: ' + ${loja.telefone}">CNPJ</div>
-        </td>
-        <td class="direita">
-          <div th:text="'OS nº ' + ${ordem.id}">OS nº 1</div>
-          <div th:text="'Data: ' + ${#temporals.format(ordem.dataCriacao, 'dd/MM/yyyy')}">Data</div>
-        </td>
-      </tr>
+    <table class="resumo">
+        <tr>
+            <td style="width: 17%;">
+                <div class="rotulo">Entrada</div>
+                <div class="valor" th:text="${#temporals.format(ordem.dataCriacao, 'dd/MM/yyyy')}">01/01/2026</div>
+            </td>
+            <td style="width: 25%;">
+                <div class="rotulo">Setor</div>
+                <div class="valor" th:text="${ordem.setor.name() == 'PNEUMATICA'} ? 'Pneumática' : 'Hidráulica'">Hidráulica</div>
+            </td>
+            <td>
+                <div class="rotulo">Equipamentos</div>
+                <div class="valor" th:text="${#lists.size(ordem.itens)} + (${#lists.size(ordem.itens) == 1} ? ' item' : ' itens')">1 item</div>
+            </td>
+        </tr>
     </table>
-  </div>
 
-  <div class="titulo">Ordem de Manutenção</div>
+    <div class="bloco">
+        <div class="bloco-titulo">Cliente</div>
+            <table class="campos">
+                <tr>
+                    <td style="width: 60%;">
+                        <div class="rotulo">Empresa</div>
+                        <div class="valor forte" th:text="${ordem.empresa}">Empresa</div>
+                    </td>
+                    <td>
+                        <div class="rotulo">Telefone</div>
+                        <div class="valor" th:text="${ordem.telefone ?: '—'}">Telefone</div>
+                    </td>
+                </tr>
+                <tr th:if="${ordem.comprador != null or ordem.email != null}">
+                    <td>
+                        <th:block th:if="${ordem.comprador != null}">
+                            <div class="rotulo">Responsável</div>
+                            <div th:text="${ordem.comprador}">Comprador</div>
+                        </th:block>
+                    </td>
+                    <td>
+                        <th:block th:if="${ordem.email != null}">
+                            <div class="rotulo">E-mail</div>
+                            <div th:text="${ordem.email}">E-mail</div>
+                        </th:block>
+                    </td>
+                </tr>
+            </table>
+    </div>
 
-  <!-- DADOS -->
-  <table class="dados">
-    <tr>
-      <td><b>Empresa:</b> <span th:text="${ordem.empresa}"></span></td>
-      <td><b>Telefone:</b> <span th:text="${ordem.telefone}"></span></td>
-    </tr>
-    <tr th:if="${ordem.comprador != null or ordem.email != null}">
-      <td><span th:if="${ordem.comprador != null}"><b>Comprador:</b> <span th:text="${ordem.comprador}"></span></span></td>
-      <td><span th:if="${ordem.email != null}"><b>E-mail:</b> <span th:text="${ordem.email}"></span></span></td>
-    </tr>
-  </table>
+    <div class="bloco">
+        <div class="bloco-titulo">Equipamentos</div>
+        <table class="itens">
+            <tr>
+                <th class="num">Item</th>
+                <th>Equipamento</th>
+                <th style="width: 140px;">Código</th>
+                <th class="direita" style="width: 40px;">Qtd</th>
+            </tr>
+            <tr th:each="item, i : ${ordem.itens}" th:class="${(i.even ? 'par ' : '') + (i.last ? 'ultima' : '')}">
+                <td class="num" th:text="${i.count}">1</td>
+                <td th:text="${item.produto.nome}">Cilindro</td>
+                <td th:text="${item.codigo ?: '—'}">Código</td>
+                <td class="direita" th:text="${item.quantidade}">1</td>
+            </tr>
+        </table>
+    </div>
 
-  <!-- EQUIPAMENTOS -->
-  <table class="itens">
-    <tr>
-      <th>Equipamento</th>
-      <th>Código</th>
-      <th class="direita" style="width: 50px;">Qtd</th>
-    </tr>
-    <tr th:each="item : ${ordem.itens}">
-      <td th:text="${item.produto.nome}">Cilindro</td>
-      <td th:text="${item.codigo}">Código</td>
-      <td class="direita" th:text="${item.quantidade}">1</td>
-    </tr>
-  </table>
+    <div class="bloco">
+        <div class="bloco-titulo">Problema relatado</div>
+        <div class="bloco-corpo problema quebra" th:text="${ordem.problemaRelatado}">Problema</div>
+    </div>
 
-  <!-- PROBLEMA RELATADO -->
-  <div class="caixa">
-    <div class="rotulo">Problema relatado</div>
-    <div th:text="${ordem.problemaRelatado}">Problema</div>
-  </div>
+    <div class="bloco" th:if="${ordem.observacao != null}">
+        <div class="bloco-titulo">Observações</div>
+        <div class="bloco-corpo quebra" th:text="${ordem.observacao}">Observação</div>
+    </div>
 
-  <!-- OBSERVAÇÕES -->
-  <div class="caixa" th:if="${ordem.observacao != null}">
-    <div class="rotulo">Observações</div>
-    <div th:text="${ordem.observacao}">Observação</div>
-  </div>
-
-  <!-- ASSINATURAS -->
-  <table class="assinaturas">
-    <tr>
-      <td><div class="linha">Assinatura do cliente</div></td>
-      <td><div class="linha">Responsável técnico</div></td>
-    </tr>
-  </table>
-
+    <div th:replace="~{pdf/base :: rodape('Cliente (entregou o equipamento)', 'Responsável técnico')}"></div>
 </div>
-<!-- fim da via -->
 
 </body>
 </html>

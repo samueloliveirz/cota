@@ -5,12 +5,15 @@ import com.samueloliverz.Cota.config.LojaProperties;
 import com.samueloliverz.Cota.dto.OrcamentoResponse;
 import com.samueloliverz.Cota.dto.OrdemManutencaoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,8 @@ public class PdfService {
 
     private final TemplateEngine templateEngine;
     private final LojaProperties loja;
+
+    private String logo;
 
     public byte[] gerarOrcamento(OrcamentoResponse orcamento) {
         // 1. Coloca os dados que o template vai usar
@@ -44,6 +49,8 @@ public class PdfService {
     }
     // Parte comum dos dois PDFs: HTML -> PDF
     private byte[] renderizar(String template, Context context) {
+        context.setVariable("logo", logo());
+
         // Thymeleaf preenche o HTML com os dados
         String html = templateEngine.process(template, context);
 
@@ -57,6 +64,25 @@ public class PdfService {
             return saida.toByteArray();
         } catch (IOException e) {
             throw new IllegalStateException("Erro ao gerar o PDF", e);
+        }
+    }
+
+    // O PDF é gerado sem URL base, então a imagem vai embutida no HTML (data URI).
+    // Lê o arquivo uma vez só e guarda; sem logo configurada, o cabeçalho mostra o nome da loja.
+    private String logo() {
+        if (logo != null || loja.logo() == null || loja.logo().isBlank()) {
+            return logo;
+        }
+        ClassPathResource arquivo = new ClassPathResource(loja.logo());
+        if (!arquivo.exists()) {
+            return null;
+        }
+        String tipo = loja.logo().toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+        try (InputStream entrada = arquivo.getInputStream()) {
+            logo = "data:" + tipo + ";base64," + Base64.getEncoder().encodeToString(entrada.readAllBytes());
+            return logo;
+        } catch (IOException e) {
+            throw new IllegalStateException("Erro ao ler a logo da loja", e);
         }
     }
 }

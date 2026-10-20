@@ -8,6 +8,8 @@ public record LojaProperties(
         String endereco,
         String cnpj,
         String telefone,
-        String pix
+        String pix,
+        String cor,
+        String logo
 ) {
 }
