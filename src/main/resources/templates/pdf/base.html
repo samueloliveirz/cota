@@ -84,7 +84,8 @@
                     <td style="padding: 0;">
                         <div class="loja-razao" th:text="${loja.nome}">Razão social</div>
                         <div class="loja-info">
-                            <div th:text="${loja.endereco}">Endereço</div>
+                            <!-- quebra: uma quebra de linha no endereço do application.yaml (\n) aparece no PDF -->
+                            <div class="quebra" th:text="${loja.endereco}">Endereço</div>
                             <div th:text="'CNPJ: ' + ${loja.cnpj} + '  |  Fone: ' + ${loja.telefone}">CNPJ · Telefone</div>
                         </div>
                     </td>
@@ -163,16 +164,16 @@
     <table class="itens">
         <tr>
             <th class="num">Item</th>
+            <th>Produto</th>
             <th style="width: 75px;">Código</th>
-            <th>Descrição do produto</th>
             <th class="direita" style="width: 34px;">Qtd</th>
             <th class="direita" style="width: 68px;">Vlr. unitário</th>
             <th class="direita" style="width: 68px;">Vlr. total</th>
         </tr>
         <tr th:each="item, i : ${o.itens}">
             <td class="num" th:text="${i.count}">1</td>
-            <td th:text="${item.codigo ?: '—'}">Código</td>
             <td th:text="${item.produto}">Produto</td>
+            <td th:text="${item.codigo ?: '—'}">Código</td>
             <td class="direita" th:text="${item.quantidade}">1</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
