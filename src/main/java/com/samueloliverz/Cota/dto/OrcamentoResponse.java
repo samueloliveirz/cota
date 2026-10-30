@@ -34,6 +34,7 @@ public record OrcamentoResponse(
         BigDecimal subtotal,
         BigDecimal desconto,
         BigDecimal frete,
+        BigDecimal valorSt,
         BigDecimal total
 ) {
     public static OrcamentoResponse from(Orcamento orcamento) {
@@ -59,6 +60,7 @@ public record OrcamentoResponse(
                 orcamento.calcularSubtotal(),
                 orcamento.getDesconto(),
                 orcamento.getFrete(),
+                orcamento.getValorSt(),
                 orcamento.calcularTotal()
         );
     }

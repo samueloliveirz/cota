@@ -42,6 +42,17 @@ class OrcamentoTest {
     }
 
     @Test
+    void deveSomarOValorDaStNoTotal() {
+        Orcamento orcamento = new Orcamento();
+        orcamento.adicionarItem(item(2, "380.00"));
+        orcamento.setValorSt(new BigDecimal("139.33"));
+
+        BigDecimal total = orcamento.calcularTotal();
+
+        assertThat(total).isEqualByComparingTo("899.33");
+    }
+
+    @Test
     void deveConsiderarFreteZeroQuandoNaoInformado() {
         Orcamento orcamento = new Orcamento();
         orcamento.adicionarItem(item(1, "100.00"));

@@ -26,6 +26,7 @@ public record OrcamentoRequest(
         @Pattern(regexp = "\\d{1,3}(/\\d{1,3})*", message = "Use os dias separados por barra, ex.: 28 ou 30/45/60") String diasFaturamento,
         @PositiveOrZero(message = "O frete não pode ser negativo") BigDecimal frete,
         @PositiveOrZero(message = "O desconto não pode ser negativo") BigDecimal desconto,
+        @PositiveOrZero(message = "O valor da ST não pode ser negativo") BigDecimal valorSt,
         @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres") String observacao,
         @Size(max = 1000, message = "A informação interna pode ter no máximo 1000 caracteres") String observacaoInterna,
         @NotEmpty(message = "Adicione pelo menos um item") @Valid List<ItemRequest> itens
@@ -44,6 +45,7 @@ public record OrcamentoRequest(
         orcamento.setDiasFaturamento(diasFaturamento);
         orcamento.setFrete(frete);
         orcamento.setDesconto(desconto);
+        orcamento.setValorSt(valorSt);
         orcamento.setObservacao(observacao);
         orcamento.setObservacaoInterna(observacaoInterna);
         itens.forEach(item -> orcamento.adicionarItem(item.toEntity()));

@@ -8,6 +8,7 @@ public record ItemResponse(
         Long id,
         String produto,
         String codigo,
+        String ncm,
         Integer quantidade,
         BigDecimal precoUnitario,
         BigDecimal total
@@ -17,6 +18,7 @@ public record ItemResponse(
                 item.getId(),
                 item.getProduto(),
                 item.getCodigo(),
+                item.getNcm(),
                 item.getQuantidade(),
                 item.getPrecoUnitario(),
                 item.calcularTotal()

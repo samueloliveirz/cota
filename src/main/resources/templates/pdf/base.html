@@ -38,7 +38,7 @@
     .fim .bloco { margin-top: 0; }
     .resumo td { border: 1px solid #222; padding: 4px 6px; }
     .bloco-titulo { border: 1px solid #222; border-bottom: none; background: #e4e4e4;
-                    padding: 3px 6px; font-size: 6.8px; font-weight: bold; text-transform: uppercase; }
+        padding: 3px 6px; font-size: 6.8px; font-weight: bold; text-transform: uppercase; }
     .bloco-corpo { border: 1px solid #222; padding: 5px 6px; }
     .campos td { border: 1px solid #222; padding: 4px 6px; }
     .problema { min-height: 44px; }
@@ -47,7 +47,7 @@
     /* Itens: grade vertical forte, linhas horizontais leves */
     table.itens { border: 1px solid #222; }
     .itens th { border: 1px solid #222; background: #e4e4e4; padding: 3px 6px;
-                font-size: 6.5px; font-weight: bold; text-transform: uppercase; text-align: left; }
+        font-size: 6.5px; font-weight: bold; text-transform: uppercase; text-align: left; }
     .itens td { border-left: 1px solid #222; border-right: 1px solid #222; border-bottom: 0.5px solid #aaa; padding: 4px 6px; }
     .itens th.direita, .itens td.direita { text-align: right; }
     .itens .num { width: 22px; text-align: center; }
@@ -159,13 +159,14 @@
 </div>
 
 <!-- ITENS -->
-<div th:fragment="itens(o)" class="bloco">
+<div th:fragment="itens(o)" class="bloco" th:with="temNcm=${o.itens.?[ncm != null].size() > 0}">
     <div class="bloco-titulo">Produtos</div>
     <table class="itens">
         <tr>
             <th class="num">Item</th>
             <th>Produto</th>
             <th style="width: 75px;">Código</th>
+            <th th:if="${temNcm}" style="width: 58px;">NCM</th>
             <th class="direita" style="width: 34px;">Qtd</th>
             <th class="direita" style="width: 68px;">Vlr. unitário</th>
             <th class="direita" style="width: 68px;">Vlr. total</th>
@@ -174,6 +175,7 @@
             <td class="num" th:text="${i.count}">1</td>
             <td th:text="${item.produto}">Produto</td>
             <td th:text="${item.codigo ?: '—'}">Código</td>
+            <td th:if="${temNcm}" th:text="${item.ncm ?: '—'}">NCM</td>
             <td class="direita" th:text="${item.quantidade}">1</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
@@ -181,7 +183,7 @@
     </table>
 </div>
 
-<!-- TOTAIS: desconto e frete só aparecem quando existem -->
+<!-- TOTAIS: desconto, frete e ST só aparecem quando existem -->
 <div th:fragment="totais(o)">
     <div class="bloco-titulo">Cálculo do total</div>
     <table class="totais">
@@ -196,6 +198,10 @@
         <tr th:if="${o.frete != null and o.frete.signum() > 0}">
             <td>(+) Frete</td>
             <td class="direita" th:text="${#numbers.formatDecimal(o.frete, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+        </tr>
+        <tr th:if="${o.valorSt != null and o.valorSt.signum() > 0}">
+            <td>(+) ICMS-ST</td>
+            <td class="direita" th:text="${#numbers.formatDecimal(o.valorSt, 1, 'POINT', 2, 'COMMA')}">0,00</td>
         </tr>
         <tr class="total">
             <td>VALOR TOTAL (R$)</td>

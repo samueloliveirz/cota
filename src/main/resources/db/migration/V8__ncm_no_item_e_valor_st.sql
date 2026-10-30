@@ -1,0 +1,2 @@
+ALTER TABLE item_orcamento ADD COLUMN ncm VARCHAR(10);
+ALTER TABLE orcamento ADD COLUMN valor_st NUMERIC(12, 2);

@@ -24,6 +24,9 @@ public class ItemOrcamento {
 
     private String codigo;
 
+    @Column(length = 10)
+    private String ncm;
+
     @Column(nullable = false)
     private Integer quantidade;
 

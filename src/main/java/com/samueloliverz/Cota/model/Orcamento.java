@@ -63,6 +63,9 @@ public class  Orcamento {
     @Column(precision = 12, scale = 2)
     private BigDecimal frete;
 
+    @Column(precision = 12, scale = 2)
+    private BigDecimal valorSt;
+
     @Column(length = 1000)
     private String observacao;
 
@@ -107,7 +110,8 @@ public class  Orcamento {
     public BigDecimal calcularTotal() {
         BigDecimal valorFrete = frete != null ? frete : BigDecimal.ZERO;
         BigDecimal valorDesconto = desconto != null ? desconto : BigDecimal.ZERO;
-        return calcularSubtotal().subtract(valorDesconto).add(valorFrete);
+        BigDecimal st = valorSt != null ? valorSt : BigDecimal.ZERO;
+        return calcularSubtotal().subtract(valorDesconto).add(valorFrete).add(st);
     }
 
     public LocalDate getDataValidade() {

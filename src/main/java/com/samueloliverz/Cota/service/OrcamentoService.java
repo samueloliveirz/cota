@@ -48,6 +48,7 @@ public class OrcamentoService {
         orcamento.setDiasFaturamento(dados.getDiasFaturamento());
         orcamento.setFrete(dados.getFrete());
         orcamento.setDesconto(dados.getDesconto());
+        orcamento.setValorSt(dados.getValorSt());
         orcamento.setObservacao(dados.getObservacao());
         orcamento.setObservacaoInterna(dados.getObservacaoInterna());
         orcamento.setComprador(dados.getComprador());

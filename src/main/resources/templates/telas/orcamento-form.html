@@ -163,6 +163,7 @@
               <tr>
                 <th style="width: 38%">Produto</th>
                 <th>Código</th>
+                <th style="width: 120px">NCM</th>
                 <th style="width: 80px">Qtd</th>
                 <th style="width: 130px">Preço unit. (R$)</th>
                 <th class="direita" style="width: 110px">Total</th>
@@ -206,6 +207,10 @@
               <span class="lbl">Frete (R$)</span>
               <input class="in" id="frete" type="number" min="0" step="0.01" value="0">
             </label>
+            <label class="campo" style="flex: 0 1 180px">
+              <span class="lbl">ICMS-ST (R$) <span class="dica">(valor do financeiro)</span></span>
+              <input class="in" id="valorSt" type="number" min="0" step="0.01" placeholder="0,00">
+            </label>
             <label class="campo">
               <span class="lbl">Observação</span>
               <textarea class="in" id="observacao" rows="2" placeholder="Aparece no PDF"></textarea>
@@ -226,6 +231,7 @@
         <div class="resumo-linha"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
         <div class="resumo-linha linha-desconto escondido" id="linhaDesconto"><span>Desconto</span><span id="valorDesconto">− R$ 0,00</span></div>
         <div class="resumo-linha"><span>Frete</span><span id="valorFrete">R$ 0,00</span></div>
+        <div class="resumo-linha escondido" id="linhaSt"><span>ICMS-ST</span><span id="valorStResumo">R$ 0,00</span></div>
 
         <div class="desconto">
           <span class="lbl">Desconto nos produtos</span>
@@ -257,7 +263,7 @@
   const tabela = document.getElementById('itens');
   const escolhas = { tipo: 'FORMALIZADO', tipoRetirada: 'LOJA', formaPagamento: 'A_VISTA' };
   const ROTULOS = { FORMALIZADO: 'Formalizado', NORMAL: 'Normal', PRESENCIAL: 'Presencial', VALE: 'Vale' };
-  const CAMPOS_TEXTO = ['empresa', 'cnpj', 'comprador', 'telefone', 'email', 'enderecoEnvio', 'diasFaturamento', 'frete', 'observacao', 'observacaoInterna'];
+  const CAMPOS_TEXTO = ['empresa', 'cnpj', 'comprador', 'telefone', 'email', 'enderecoEnvio', 'diasFaturamento', 'frete', 'valorSt', 'observacao', 'observacaoInterna'];
 
   let modoDesconto = 'valor';
   let descontoAtual = 0;
@@ -314,6 +320,7 @@
     linha.innerHTML = `
             <td><input class="in produto" placeholder="Nome do produto"></td>
             <td><input class="in codigo mono" placeholder="Opcional"></td>
+            <td><input class="in ncm mono" placeholder="Opcional" maxlength="10"></td>
             <td><input class="in quantidade" type="number" min="1" value="1"></td>
             <td><input class="in preco" type="number" min="0.01" step="0.01"></td>
             <td class="direita total-item">R$ 0,00</td>
@@ -321,6 +328,7 @@
         `;
     linha.querySelector('.produto').value = item.produto ?? '';
     linha.querySelector('.codigo').value = item.codigo ?? '';
+    linha.querySelector('.ncm').value = item.ncm ?? '';
     linha.querySelector('.quantidade').value = item.quantidade ?? 1;
     linha.querySelector('.preco').value = item.precoUnitario ?? '';
     tabela.appendChild(linha);
@@ -356,6 +364,7 @@
     subtotal = centavos(subtotal);
     descontoAtual = calcularDesconto(subtotal);
     const frete = numero('frete') || 0;
+    const st = numero('valorSt') || 0;
     const dias = texto('diasFaturamento');
 
     campo('subtotal').textContent = reais(subtotal);
@@ -363,7 +372,9 @@
     campo('linhaDesconto').classList.toggle('escondido', descontoAtual <= 0);
     campo('avisoDesconto').classList.toggle('escondido', descontoAtual <= subtotal);
     campo('valorFrete').textContent = reais(frete);
-    campo('total').textContent = reais(subtotal - descontoAtual + frete);
+    campo('valorStResumo').textContent = reais(st);
+    campo('linhaSt').classList.toggle('escondido', st <= 0);
+    campo('total').textContent = reais(subtotal - descontoAtual + frete + st);
     campo('resumoTipo').textContent = ROTULOS[escolhas.tipo];
     campo('resumoPagamento').textContent = escolhas.formaPagamento === 'FATURADO'
             ? (dias ? `Faturado ${dias} dias` : 'Faturado')
@@ -445,6 +456,7 @@
     return [...tabela.querySelectorAll('tr')].map(linha => ({
       produto: linha.querySelector('.produto').value,
       codigo: linha.querySelector('.codigo').value,
+      ncm: linha.querySelector('.ncm').value,
       quantidade: linha.querySelector('.quantidade').value,
       precoUnitario: linha.querySelector('.preco').value
     }));
@@ -454,6 +466,7 @@
     const itens = lerItensTela().map(item => ({
       produto: item.produto.trim(),
       codigo: item.codigo.trim() || null,
+      ncm: (item.ncm ?? '').trim() || null,
       quantidade: Number(item.quantidade),
       precoUnitario: Number(item.precoUnitario)
     }));
@@ -470,6 +483,7 @@
       formaPagamento: escolhas.formaPagamento,
       diasFaturamento: escolhas.formaPagamento === 'FATURADO' ? texto('diasFaturamento') : null,
       frete: numero('frete'),
+      valorSt: numero('valorSt'),
       desconto: descontoAtual > 0 ? descontoAtual : null,
       observacao: texto('observacao'),
       observacaoInterna: texto('observacaoInterna'),
@@ -649,6 +663,7 @@
   });
   campo('adicionar').addEventListener('click', () => adicionarItem());
   campo('frete').addEventListener('input', recalcular);
+  campo('valorSt').addEventListener('input', recalcular);
   campo('diasFaturamento').addEventListener('input', recalcular);
   campo('descontoPercentual').addEventListener('input', () => {
     modoDesconto = 'percentual';
