@@ -2,7 +2,17 @@
 
 API REST para criação e acompanhamento de orçamentos comerciais, feita em **Java + Spring Boot**.
 
-O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de materiais hidráulicos e fazia os orçamentos numa ferramenta HTML simples, sem nada salvo. O Cota guarda cada orçamento no banco, calcula os valores no back-end e mostra quais orçamentos ainda estão aguardando resposta do cliente.
+O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de materiais hidráulicos, onde os orçamentos eram feitos no papel ou em apps de terceiros que não atendiam 100% à necessidade, e nada ficava salvo. O Cota guarda cada orçamento no banco, calcula os valores no back-end e mostra quais orçamentos ainda estão aguardando resposta do cliente.
+
+## Demo online
+
+Acesse: https://cota-demo.onrender.com/login
+
+| Usuário | Senha | Perfil |
+|---|---|---|
+| `userteste` | `userteste` | USER |
+
+> O primeiro acesso pode demorar cerca de 1 minuto, porque o servidor gratuito do Render "dorme" quando fica parado.
 
 ## Funcionalidades
 
@@ -21,7 +31,7 @@ O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de 
 - Ordem de manutenção com PDF em duas vias
 - PDF por tipo de orçamento (formalizado, normal, presencial e vale)
 - Telas web: menu, novo orçamento, nova manutenção e lista
-- - Login com usuários no banco (senha com BCrypt) e perfis USER e ADMIN
+- Login com usuários no banco (senha com BCrypt) e perfis USER e ADMIN
 - Cada vendedor vê só os orçamentos do seu setor (hidráulica ou pneumática); o ADMIN vê todos
 - Cadastro de usuários restrito ao ADMIN
 
@@ -53,8 +63,11 @@ O projeto nasceu de uma necessidade real: trabalho como vendedor em uma loja de 
 - Spring Boot 4
 - Spring Web
 - Spring Data JPA / Hibernate
+- Spring Security
 - Bean Validation
 - PostgreSQL 16
+- Flyway
+- Thymeleaf
 - Docker e Docker Compose
 - Lombok
 - Maven
@@ -71,9 +84,9 @@ model       → entidades JPA (Orcamento, ItemOrcamento)
 dto         → dados de entrada (Request) e saída (Response)
 exception   → tratamento global de erros (@RestControllerAdvice)
 enums       → TipoRetirada, FormaPagamento, StatusOrcamento
-Documentação interativa (Swagger): `http://localhost:8080/swagger-ui.html`
-
 ```
+
+Documentação interativa (Swagger): `http://localhost:8080/swagger-ui.html`
 
 Os valores (subtotal e total) não ficam salvos no banco: são calculados a partir dos itens e do frete, assim nunca ficam desatualizados.
 
@@ -176,6 +189,15 @@ Resposta (resumida):
   "dataHora": "2026-09-29T21:00:00"
 }
 ```
+
+## Uso de IA
+
+Usei IA como ferramenta de apoio em duas frentes:
+
+- **Encontrar erros:** quando travava em um bug, usava IA pra ajudar a achar a causa a partir do erro e do código. A correção eu entendia antes de aplicar.
+- **Front-end:** as telas web (HTML com Thymeleaf e CSS) foram feitas com ajuda de IA, já que o foco do projeto é o back-end.
+
+O back-end (modelagem, regras de negócio, camadas, segurança e migrations) foi escrito por mim.
 
 ## Próximos passos
 
