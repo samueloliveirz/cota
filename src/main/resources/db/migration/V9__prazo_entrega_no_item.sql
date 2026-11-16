@@ -1,0 +1,1 @@
+ALTER TABLE item_orcamento ADD COLUMN prazo_entrega VARCHAR(30);

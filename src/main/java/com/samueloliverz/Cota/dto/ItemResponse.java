@@ -11,7 +11,8 @@ public record ItemResponse(
         String ncm,
         Integer quantidade,
         BigDecimal precoUnitario,
-        BigDecimal total
+        BigDecimal total,
+        String prazoEntrega
 ) {
     public static ItemResponse from(ItemOrcamento item) {
         return new ItemResponse(
@@ -21,7 +22,8 @@ public record ItemResponse(
                 item.getNcm(),
                 item.getQuantidade(),
                 item.getPrecoUnitario(),
-                item.calcularTotal()
+                item.calcularTotal(),
+                item.getPrazoEntrega()
         );
     }
 }

@@ -165,6 +165,7 @@
                 <th>Código</th>
                 <th style="width: 120px">NCM</th>
                 <th style="width: 80px">Qtd</th>
+                <th style="width: 130px">Entrega/Dias</th>
                 <th style="width: 130px">Preço unit. (R$)</th>
                 <th class="direita" style="width: 110px">Total</th>
                 <th style="width: 44px"></th>
@@ -322,6 +323,7 @@
             <td><input class="in codigo mono" placeholder="Opcional"></td>
             <td><input class="in ncm mono" placeholder="Opcional" maxlength="10"></td>
             <td><input class="in quantidade" type="number" min="1" value="1"></td>
+            <td><input class="in prazo-entrega" maxlength="30" placeholder="Imediato"></td>
             <td><input class="in preco" type="number" min="0.01" step="0.01"></td>
             <td class="direita total-item">R$ 0,00</td>
             <td><button type="button" class="remover" aria-label="Remover item">✕</button></td>
@@ -330,6 +332,7 @@
     linha.querySelector('.codigo').value = item.codigo ?? '';
     linha.querySelector('.ncm').value = item.ncm ?? '';
     linha.querySelector('.quantidade').value = item.quantidade ?? 1;
+    linha.querySelector('.prazo-entrega').value = item.prazoEntrega ?? '';
     linha.querySelector('.preco').value = item.precoUnitario ?? '';
     tabela.appendChild(linha);
     recalcular();
@@ -458,6 +461,7 @@
       codigo: linha.querySelector('.codigo').value,
       ncm: linha.querySelector('.ncm').value,
       quantidade: linha.querySelector('.quantidade').value,
+      prazoEntrega: linha.querySelector('.prazo-entrega').value,
       precoUnitario: linha.querySelector('.preco').value
     }));
   }
@@ -468,7 +472,8 @@
       codigo: item.codigo.trim() || null,
       ncm: (item.ncm ?? '').trim() || null,
       quantidade: Number(item.quantidade),
-      precoUnitario: Number(item.precoUnitario)
+      precoUnitario: Number(item.precoUnitario),
+      prazoEntrega: (item.prazoEntrega ?? '').trim() || null
     }));
 
     return {

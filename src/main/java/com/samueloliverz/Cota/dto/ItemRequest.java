@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
@@ -15,7 +16,8 @@ public record ItemRequest(
         @NotNull(message = "Informe a quantidade")
         @Positive(message = "A quantidade precisa ser maior que zero") Integer quantidade,
         @NotNull(message = "Informe o preço unitário")
-        @Positive(message = "O preço precisa ser maior que zero") BigDecimal precoUnitario
+        @Positive(message = "O preço precisa ser maior que zero") BigDecimal precoUnitario,
+        @Size(max = 30, message = "O prazo de entrega pode ter no máximo 30 caracteres") String prazoEntrega
 ) {
     public ItemOrcamento toEntity() {
         ItemOrcamento item = new ItemOrcamento();
@@ -24,6 +26,7 @@ public record ItemRequest(
         item.setNcm(formatarNcm(ncm));
         item.setQuantidade(quantidade);
         item.setPrecoUnitario(precoUnitario);
+        item.setPrazoEntrega(prazoEntrega);
         return item;
     }
 

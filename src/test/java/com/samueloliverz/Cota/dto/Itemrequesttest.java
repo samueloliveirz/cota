@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ItemRequestTest {
 
     private ItemRequest comNcm(String ncm) {
-        return new ItemRequest("Valvula hidraulica", "VAL-HID", ncm, 1, new BigDecimal("600.00"));
+        return new ItemRequest("Valvula hidraulica", "VAL-HID", ncm, 1, new BigDecimal("600.00"), null);
     }
 
     @Test

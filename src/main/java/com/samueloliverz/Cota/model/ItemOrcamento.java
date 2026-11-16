@@ -33,6 +33,9 @@ public class ItemOrcamento {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal precoUnitario;
 
+    @Column(length = 30)
+    private String prazoEntrega;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orcamento_id", nullable = false)

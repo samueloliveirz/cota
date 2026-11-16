@@ -168,6 +168,7 @@
             <th style="width: 75px;">Código</th>
             <th th:if="${temNcm}" style="width: 58px;">NCM</th>
             <th class="direita" style="width: 34px;">Qtd</th>
+            <th style="width: 60px; text-align: center;">Entrega/<br/>Dias</th>
             <th class="direita" style="width: 68px;">Vlr. unitário</th>
             <th class="direita" style="width: 68px;">Vlr. total</th>
         </tr>
@@ -177,6 +178,7 @@
             <td th:text="${item.codigo ?: '—'}">Código</td>
             <td th:if="${temNcm}" th:text="${item.ncm ?: '—'}">NCM</td>
             <td class="direita" th:text="${item.quantidade}">1</td>
+            <td style="text-align: center;" th:text="${item.prazoEntrega ?: 'Imediato'}">Imediato</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
             <td class="direita" th:text="${#numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
         </tr>
@@ -218,6 +220,7 @@
         <div th:if="${o.tipoRetirada.name() == 'SEDEX' and o.frete != null and o.frete.signum() > 0}">Frete incluso no valor total.</div>
         <div th:if="${o.tipoRetirada.name() == 'SEDEX' and (o.frete == null or o.frete.signum() == 0)}">Frete por conta do cliente (FOB).</div>
         <div>Preços e disponibilidade válidos até a data de validade.</div>
+        <div th:if="${o.itens.?[prazoEntrega != null and !prazoEntrega.equalsIgnoreCase('imediato')].size() > 0}">Prazo de entrega informado em dias úteis, contados a partir da confirmação do pedido.</div>
         <div th:if="${o.observacao != null}" class="quebra" th:text="${o.observacao}" style="margin-top: 4px;">Observação</div>
     </div>
 </div>
